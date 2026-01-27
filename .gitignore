@@ -32,3 +32,6 @@ htmlcov/
 .coverage
 .tox/
 .pytest_cache/
+
+venv/
+env/
