@@ -1,0 +1,25 @@
+﻿@import 'abstracts/variables';
+
+// Các thiết lập cơ bản
+body {
+    font-family: $font-main;
+    background-color: $bg-light;
+    color: $text-dark;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+// Chừa sẵn "đất" cho Hiếu (nhánh map) nhúng bản đồ
+#map {
+    width: 100%;
+    height: 450px;
+    background: #ddd;
+    border-radius: 10px;
+    margin: 20px 0;
+}
