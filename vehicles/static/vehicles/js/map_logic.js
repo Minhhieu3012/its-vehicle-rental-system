@@ -17,44 +17,37 @@ function initMap(vehicleData) {
     attribution: "&copy; OpenStreetMap",
   }).addTo(map);
 
-  // --- B. ĐỊNH NGHĨA BỘ ICON (MÀU SẮC KHÁC NHAU) ---
-  // Icon cho xe Sẵn sàng (Available) - Màu Xanh Lá
-  var iconGreen = L.icon({
-    iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  });
+  // --- B. ĐỊNH NGHĨA ICON CHUYÊN NGHIỆP (SVG) ---
 
-  // Icon cho xe Đã đặt (Booked) - Màu Đỏ (Theo yêu cầu)
-  var iconRed = L.icon({
-    iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  });
+  // Hàm tạo icon hình chiếc xe bằng mã SVG (Không cần tải ảnh)
+  function createCarIcon(color) {
+    var svgHtml = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="35" height="35">
+              <path fill="${color}" stroke="white" stroke-width="20" d="M112 112c0-26.5 21.5-48 48-48h192c26.5 0 48 21.5 48 48v288c0 26.5-21.5 48-48 48H160c-26.5 0-48-21.5-48-48V112z"/>
+              <path fill="rgba(255,255,255,0.5)" d="M160 128h192v64H160z"/> <circle cx="120" cy="144" r="20" fill="#333"/> <circle cx="392" cy="144" r="20" fill="#333"/>
+              <circle cx="120" cy="368" r="20" fill="#333"/>
+              <circle cx="392" cy="368" r="20" fill="#333"/>
+          </svg>
+      `;
 
-  // Icon cho xe Bảo trì (Maintenance) - Màu Xám
-  var iconGrey = L.icon({
-    iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  });
+    return L.divIcon({
+      className: "custom-car-icon",
+      html: svgHtml,
+      iconSize: [35, 35], // Kích thước icon
+      iconAnchor: [17, 17], // Căn giữa tâm (để marker nằm đúng vị trí)
+      popupAnchor: [0, -10], // Popup hiện lên trên một chút
+    });
+  }
 
-  // Icon User - Màu Vàng (Gold) để không bị trùng với xe màu Đỏ
+  // Tạo 3 loại icon xe theo màu sắc
+  var iconGreen = createCarIcon("#28a745"); // Xanh lá (Available)
+  var iconRed = createCarIcon("#dc3545"); // Đỏ (Booked)
+  var iconGrey = createCarIcon("#6c757d"); // Xám (Maintenance)
+
+  // Icon User (Vẫn giữ kiểu Pin màu Vàng để phân biệt với xe)
   var userIcon = L.icon({
     iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
     shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -71,39 +64,35 @@ function initMap(vehicleData) {
   locateUser();
 
   // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
-  // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
   vehicleData.forEach(function (xe) {
-    // 1. Chuẩn hóa trạng thái (để tránh lỗi viết hoa/thường)
-    // Nếu status bị null thì gán mặc định là 'available'
+    // 1. Chuẩn hóa trạng thái
     var rawStatus = xe.status ? xe.status.toString() : "available";
     var statusNormal = rawStatus.toLowerCase().trim();
 
-    // 2. Tạo đường dẫn đặt xe (Dựa trên ID xe)
+    // 2. Tạo link đặt xe
     var bookingUrl = "/bookings/create/" + xe.id + "/";
 
-    // 3. Logic chọn màu Icon (Dựa trên status đã chuẩn hóa)
+    // 3. Logic chọn icon SVG
     var finalIcon;
     if (statusNormal === "booked" || statusNormal === "da_dat") {
-      finalIcon = iconRed; // Xe bận -> Đỏ
+      finalIcon = iconRed;
     } else if (statusNormal === "maintenance" || statusNormal === "bao_tri") {
-      finalIcon = iconGrey; // Bảo trì -> Xám
+      finalIcon = iconGrey;
     } else {
-      finalIcon = iconGreen; // Còn lại (available) -> Xanh lá
+      finalIcon = iconGreen;
     }
 
-    // 4. Xác định xem xe có rảnh không
+    // 4. Logic nút bấm
     var isAvailable =
       statusNormal === "available" || statusNormal === "san_sang";
-
-    // 5. Logic Style nút bấm (Disabled nếu không rảnh)
     var btnStyle = isAvailable
       ? "cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px;"
       : "background: #ccc; cursor: not-allowed; color: #666; border: none; padding: 5px 10px; border-radius: 3px;";
 
-    // 6. Vẽ Marker
+    // 5. Vẽ Marker
     var marker = L.marker([xe.lat, xe.lng], { icon: finalIcon }).addTo(map);
 
-    // 7. Tạo nội dung Popup
+    // 6. Nội dung Popup
     var popupContent = `
             <div style="text-align: center;">
                 <h3 style="margin: 0; color: #007bff;">${xe.plate}</h3>
@@ -127,15 +116,29 @@ function initMap(vehicleData) {
   });
 }
 
-// 3. HÀM XỬ LÝ GEOLOCATION
+// 3. CÁC HÀM XỬ LÝ MODAL (UI/UX)
+function openModal() {
+  document.getElementById("routeModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("routeModal").style.display = "none";
+}
+
+window.onclick = function (event) {
+  var modal = document.getElementById("routeModal");
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
+// 4. HÀM XỬ LÝ GEOLOCATION
 function locateUser() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       function (position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
-        console.log("Đã tìm thấy vị trí:", userLat, userLng);
-
         userMarker.setLatLng([userLat, userLng]);
         userMarker.bindPopup("<b>Bạn đang ở đây!</b>").openPopup();
         map.flyTo([userLat, userLng], 14, { duration: 1.5 });
@@ -147,24 +150,7 @@ function locateUser() {
   }
 }
 
-// 4. HÀM VẼ ĐƯỜNG & TÍNH TIỀN
-function openModal() {
-  document.getElementById("routeModal").style.display = "block";
-}
-
-function closeModal() {
-  document.getElementById("routeModal").style.display = "none";
-}
-
-// Khi click ra ngoài vùng modal thì cũng đóng
-window.onclick = function (event) {
-  var modal = document.getElementById("routeModal");
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-};
-
-// --- 6. HÀM VẼ ĐƯỜNG & HIỆN MODAL (NÂNG CẤP) ---
+// 5. HÀM VẼ ĐƯỜNG & HIỆN MODAL
 window.chiDuong = function (destLat, destLng) {
   console.log("Đang tính toán đường đi...");
 
@@ -176,7 +162,7 @@ window.chiDuong = function (destLat, destLng) {
     waypoints: [L.latLng(userLat, userLng), L.latLng(destLat, destLng)],
     routeWhileDragging: false,
     showAlternatives: false,
-    show: false, // Vẫn tắt bảng mặc định của Leaflet để dùng Modal xịn của mình
+    show: false, // Tắt bảng mặc định để dùng Modal
     lineOptions: {
       styles: [{ color: "blue", opacity: 0.6, weight: 6 }],
     },
@@ -185,11 +171,11 @@ window.chiDuong = function (destLat, destLng) {
     },
   })
     .on("routesfound", function (e) {
-      // Lấy dữ liệu đường đi đầu tiên
+      // Lấy dữ liệu đường đi
       var route = e.routes[0];
       var summary = route.summary;
 
-      // 1. Tính toán giá tiền & Khoảng cách
+      // Tính toán
       var distanceInKm = (summary.totalDistance / 1000).toFixed(2);
       var pricePerKm = 15000;
       var estimatedPrice = Math.round(distanceInKm * pricePerKm).toLocaleString(
@@ -197,7 +183,7 @@ window.chiDuong = function (destLat, destLng) {
       );
       var timeInMinutes = Math.round(summary.totalTime / 60);
 
-      // 2. Đổ dữ liệu vào phần Tóm tắt (Summary)
+      // Đổ vào Modal - Phần Tóm tắt
       var summaryHTML = `
         <div><b>🏁 Quãng đường:</b> ${distanceInKm} km</div>
         <div><b>⏳ Thời gian dự kiến:</b> ${timeInMinutes} phút</div>
@@ -207,14 +193,12 @@ window.chiDuong = function (destLat, destLng) {
       `;
       document.getElementById("route-summary").innerHTML = summaryHTML;
 
-      // 3. Xử lý Hướng dẫn đường đi (Instructions)
-      // OSRM trả về mảng instructions chứa text, distance, direction...
+      // Đổ vào Modal - Phần Hướng dẫn
       var instructions = route.instructions;
       var listHTML = "";
 
       instructions.forEach(function (step) {
-        // Tạo icon mũi tên đơn giản dựa trên text (logic tương đối)
-        var icon = "⬆️"; // Mặc định đi thẳng
+        var icon = "⬆️";
         if (step.text.includes("Left") || step.text.includes("left"))
           icon = "⬅️";
         if (step.text.includes("Right") || step.text.includes("right"))
@@ -222,7 +206,6 @@ window.chiDuong = function (destLat, destLng) {
         if (step.text.includes("Arrive") || step.text.includes("destination"))
           icon = "🎯";
 
-        // Dịch sơ bộ sang tiếng Việt
         var textVi = step.text
           .replace("Head", "Đi về hướng")
           .replace("Turn left", "Rẽ trái")
@@ -240,10 +223,7 @@ window.chiDuong = function (destLat, destLng) {
             </li>
           `;
       });
-
       document.getElementById("route-instructions").innerHTML = listHTML;
-
-      // 4. Mở Modal lên
       openModal();
     })
     .addTo(map);
