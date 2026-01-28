@@ -20,6 +20,26 @@
   <body>
     <div id="map"></div>
 
+    <div id="routeModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>📍 Chi tiết lộ trình</h3>
+          <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+
+        <div class="modal-body">
+          <div id="route-summary" class="summary-box">Loading...</div>
+
+          <h4>Hướng dẫn di chuyển:</h4>
+          <ul id="route-instructions" class="instruction-list"></ul>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 

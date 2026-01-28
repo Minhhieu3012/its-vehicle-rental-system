@@ -71,30 +71,39 @@ function initMap(vehicleData) {
   locateUser();
 
   // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
+  // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
   vehicleData.forEach(function (xe) {
-    // --- LOGIC CHỌN MÀU ---
-    var finalIcon;
-    var statusText = xe.status; // Lấy trạng thái
+    // 1. Chuẩn hóa trạng thái (để tránh lỗi viết hoa/thường)
+    // Nếu status bị null thì gán mặc định là 'available'
+    var rawStatus = xe.status ? xe.status.toString() : "available";
+    var statusNormal = rawStatus.toLowerCase().trim();
 
-    if (statusText === "booked") {
+    // 2. Tạo đường dẫn đặt xe (Dựa trên ID xe)
+    var bookingUrl = "/bookings/create/" + xe.id + "/";
+
+    // 3. Logic chọn màu Icon (Dựa trên status đã chuẩn hóa)
+    var finalIcon;
+    if (statusNormal === "booked" || statusNormal === "da_dat") {
       finalIcon = iconRed; // Xe bận -> Đỏ
-    } else if (statusText === "maintenance") {
+    } else if (statusNormal === "maintenance" || statusNormal === "bao_tri") {
       finalIcon = iconGrey; // Bảo trì -> Xám
     } else {
       finalIcon = iconGreen; // Còn lại (available) -> Xanh lá
     }
 
+    // 4. Xác định xem xe có rảnh không
+    var isAvailable =
+      statusNormal === "available" || statusNormal === "san_sang";
+
+    // 5. Logic Style nút bấm (Disabled nếu không rảnh)
+    var btnStyle = isAvailable
+      ? "cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px;"
+      : "background: #ccc; cursor: not-allowed; color: #666; border: none; padding: 5px 10px; border-radius: 3px;";
+
+    // 6. Vẽ Marker
     var marker = L.marker([xe.lat, xe.lng], { icon: finalIcon }).addTo(map);
 
-    // Chỉ hiện nút "Đặt xe" nếu xe đang Available
-    // Nếu xe bận hoặc bảo trì thì ẩn nút đi (disabled)
-    var btnStyle =
-      "cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px;";
-    if (statusText !== "available") {
-      btnStyle =
-        "background: #ccc; cursor: not-allowed; color: #666; border: none; padding: 5px 10px; border-radius: 3px;";
-    }
-
+    // 7. Tạo nội dung Popup
     var popupContent = `
             <div style="text-align: center;">
                 <h3 style="margin: 0; color: #007bff;">${xe.plate}</h3>
@@ -107,10 +116,10 @@ function initMap(vehicleData) {
                     🚗 Chỉ đường & Tính giá
                 </button>
 
-                <button onclick="${statusText === "available" ? `alert('Đã chọn xe ${xe.plate}')` : "return false;"}" 
+                <button onclick="${isAvailable ? `window.location.href='${bookingUrl}'` : "return false;"}" 
                     class="popup-btn" 
                     style="${btnStyle}">
-                    ${statusText === "available" ? "Đặt ngay" : "Không khả dụng"}
+                    ${isAvailable ? "Đặt ngay" : "Không khả dụng"}
                 </button>
             </div>
         `;
@@ -139,6 +148,23 @@ function locateUser() {
 }
 
 // 4. HÀM VẼ ĐƯỜNG & TÍNH TIỀN
+function openModal() {
+  document.getElementById("routeModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("routeModal").style.display = "none";
+}
+
+// Khi click ra ngoài vùng modal thì cũng đóng
+window.onclick = function (event) {
+  var modal = document.getElementById("routeModal");
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
+// --- 6. HÀM VẼ ĐƯỜNG & HIỆN MODAL (NÂNG CẤP) ---
 window.chiDuong = function (destLat, destLng) {
   console.log("Đang tính toán đường đi...");
 
@@ -150,7 +176,7 @@ window.chiDuong = function (destLat, destLng) {
     waypoints: [L.latLng(userLat, userLng), L.latLng(destLat, destLng)],
     routeWhileDragging: false,
     showAlternatives: false,
-    show: false, // Tắt bảng chỉ dẫn
+    show: false, // Vẫn tắt bảng mặc định của Leaflet để dùng Modal xịn của mình
     lineOptions: {
       styles: [{ color: "blue", opacity: 0.6, weight: 6 }],
     },
@@ -159,27 +185,66 @@ window.chiDuong = function (destLat, destLng) {
     },
   })
     .on("routesfound", function (e) {
-      // --- LOGIC LẤY KHOẢNG CÁCH ---
-      var routes = e.routes;
-      var summary = routes[0].summary;
+      // Lấy dữ liệu đường đi đầu tiên
+      var route = e.routes[0];
+      var summary = route.summary;
 
-      // summary.totalDistance: đơn vị là mét (m)
-      var distanceInKm = (summary.totalDistance / 1000).toFixed(2); // Đổi ra km, lấy 2 số lẻ
-
-      // Ví dụ: Giá cước 15.000 VNĐ / km
+      // 1. Tính toán giá tiền & Khoảng cách
+      var distanceInKm = (summary.totalDistance / 1000).toFixed(2);
       var pricePerKm = 15000;
-      var estimatedPrice = Math.round(distanceInKm * pricePerKm);
-
-      // Format tiền tệ cho đẹp (ví dụ: 200.000)
-      var formattedPrice = estimatedPrice.toLocaleString("vi-VN");
-
-      // Hiển thị thông báo (Sau này bạn có thể gán vào thẻ HTML thay vì alert)
-      alert(
-        `🚗 Quãng đường: ${distanceInKm} km\n💰 Ước tính chi phí di chuyển đến xe: ${formattedPrice} VNĐ`,
+      var estimatedPrice = Math.round(distanceInKm * pricePerKm).toLocaleString(
+        "vi-VN",
       );
+      var timeInMinutes = Math.round(summary.totalTime / 60);
 
-      console.log("Khoảng cách (m):", summary.totalDistance);
-      console.log("Thời gian (giây):", summary.totalTime);
+      // 2. Đổ dữ liệu vào phần Tóm tắt (Summary)
+      var summaryHTML = `
+        <div><b>🏁 Quãng đường:</b> ${distanceInKm} km</div>
+        <div><b>⏳ Thời gian dự kiến:</b> ${timeInMinutes} phút</div>
+        <div style="font-size: 18px; color: #c0392b; margin-top: 5px;">
+            <b>💰 Thành tiền: ${estimatedPrice} VNĐ</b>
+        </div>
+      `;
+      document.getElementById("route-summary").innerHTML = summaryHTML;
+
+      // 3. Xử lý Hướng dẫn đường đi (Instructions)
+      // OSRM trả về mảng instructions chứa text, distance, direction...
+      var instructions = route.instructions;
+      var listHTML = "";
+
+      instructions.forEach(function (step) {
+        // Tạo icon mũi tên đơn giản dựa trên text (logic tương đối)
+        var icon = "⬆️"; // Mặc định đi thẳng
+        if (step.text.includes("Left") || step.text.includes("left"))
+          icon = "⬅️";
+        if (step.text.includes("Right") || step.text.includes("right"))
+          icon = "➡️";
+        if (step.text.includes("Arrive") || step.text.includes("destination"))
+          icon = "🎯";
+
+        // Dịch sơ bộ sang tiếng Việt
+        var textVi = step.text
+          .replace("Head", "Đi về hướng")
+          .replace("Turn left", "Rẽ trái")
+          .replace("Turn right", "Rẽ phải")
+          .replace("onto", "vào đường")
+          .replace("You have arrived", "Bạn đã đến nơi");
+
+        listHTML += `
+            <li>
+                <span class="instruction-icon">${icon}</span>
+                <div>
+                    <div>${textVi}</div>
+                    <small style="color: #888;">${step.distance > 0 ? step.distance + " mét" : ""}</small>
+                </div>
+            </li>
+          `;
+      });
+
+      document.getElementById("route-instructions").innerHTML = listHTML;
+
+      // 4. Mở Modal lên
+      openModal();
     })
     .addTo(map);
 };

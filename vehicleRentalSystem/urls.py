@@ -20,5 +20,5 @@ from vehicles.views import map_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('map/', map_view, name='map_demo'),
+    path('map/', map_view, name='map'),
 ]
