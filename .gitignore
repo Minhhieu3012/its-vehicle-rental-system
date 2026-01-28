@@ -2,9 +2,16 @@
 __pycache__/
 *.py[cod]
 *.pyo
+*$py.class
 *.pyd
 *.log
 *.pot
+
+pycache/
+*.py[cod]
+
+.env
+venv/
 
 # Django stuff
 *.sqlite3
