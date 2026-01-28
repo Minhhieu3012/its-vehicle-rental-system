@@ -27,8 +27,17 @@ def map_view(request):
             'plate': '30E-111.22',
             'lat': 10.800000,
             'lng': 106.650000,
-            'status': 'maintenance', 
+            'status': 'in operation', 
             'name': 'Honda City'
+        },
+
+        {
+            'id': 4,
+            'plate': '70F-333.44',
+            'lat': 10.730000,
+            'lng': 106.680000,
+            'status': 'maintenance', 
+            'name': 'Ford Focus'
         }
     ]
 

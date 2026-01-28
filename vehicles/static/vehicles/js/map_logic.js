@@ -18,36 +18,36 @@ function initMap(vehicleData) {
   }).addTo(map);
 
   // --- B. ĐỊNH NGHĨA ICON CHUYÊN NGHIỆP (SVG) ---
-
-  // Hàm tạo icon hình chiếc xe bằng mã SVG (Không cần tải ảnh)
   function createCarIcon(color) {
     var svgHtml = `
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="35" height="35">
               <path fill="${color}" stroke="white" stroke-width="20" d="M112 112c0-26.5 21.5-48 48-48h192c26.5 0 48 21.5 48 48v288c0 26.5-21.5 48-48 48H160c-26.5 0-48-21.5-48-48V112z"/>
-              <path fill="rgba(255,255,255,0.5)" d="M160 128h192v64H160z"/> <circle cx="120" cy="144" r="20" fill="#333"/> <circle cx="392" cy="144" r="20" fill="#333"/>
+              <path fill="rgba(255,255,255,0.5)" d="M160 128h192v64H160z"/>
+              <circle cx="120" cy="144" r="20" fill="#333"/>
+              <circle cx="392" cy="144" r="20" fill="#333"/>
               <circle cx="120" cy="368" r="20" fill="#333"/>
               <circle cx="392" cy="368" r="20" fill="#333"/>
           </svg>
       `;
-
     return L.divIcon({
       className: "custom-car-icon",
       html: svgHtml,
-      iconSize: [35, 35], // Kích thước icon
-      iconAnchor: [17, 17], // Căn giữa tâm (để marker nằm đúng vị trí)
-      popupAnchor: [0, -10], // Popup hiện lên trên một chút
+      iconSize: [35, 35],
+      iconAnchor: [17, 17],
+      popupAnchor: [0, -10],
     });
   }
 
-  // Tạo 3 loại icon xe theo màu sắc
-  var iconGreen = createCarIcon("#28a745"); // Xanh lá (Available)
-  var iconRed = createCarIcon("#dc3545"); // Đỏ (Booked)
-  var iconGrey = createCarIcon("#6c757d"); // Xám (Maintenance)
+  // --- CẬP NHẬT 4 MÀU ---
+  var iconGreen = createCarIcon("#28a745"); // Available
+  var iconYellow = createCarIcon("#ffc107"); // Booked
+  var iconBlue = createCarIcon("#007bff"); // In Operation
+  var iconRed = createCarIcon("#dc3545"); // Maintenance
 
-  // Icon User (Vẫn giữ kiểu Pin màu Vàng để phân biệt với xe)
+  // Icon User
   var userIcon = L.icon({
     iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png",
     shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -60,33 +60,41 @@ function initMap(vehicleData) {
     .addTo(map)
     .bindPopup("<b>Bạn đang ở đây</b>");
 
-  // Gọi hàm lấy GPS
   locateUser();
 
   // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
   vehicleData.forEach(function (xe) {
     // 1. Chuẩn hóa trạng thái
     var rawStatus = xe.status ? xe.status.toString() : "available";
-    var statusNormal = rawStatus.toLowerCase().trim();
+    // Thay thế dấu gạch dưới và khoảng trắng để so sánh dễ hơn
+    var statusNormal = rawStatus.toLowerCase().trim().replace(/_/g, " ");
 
     // 2. Tạo link đặt xe
     var bookingUrl = "/bookings/create/" + xe.id + "/";
 
-    // 3. Logic chọn icon SVG
+    // 3. Logic chọn icon (4 Cấp độ)
     var finalIcon;
-    if (statusNormal === "booked" || statusNormal === "da_dat") {
-      finalIcon = iconRed;
-    } else if (statusNormal === "maintenance" || statusNormal === "bao_tri") {
-      finalIcon = iconGrey;
+
+    if (statusNormal === "maintenance" || statusNormal === "bao tri") {
+      finalIcon = iconRed; // Bảo trì
+    } else if (
+      statusNormal === "in operation" ||
+      statusNormal === "dang hoat dong"
+    ) {
+      finalIcon = iconBlue; // Đang chạy
+    } else if (statusNormal === "booked" || statusNormal === "da dat") {
+      finalIcon = iconYellow; // Đã đặt (nhưng chưa lấy xe)
     } else {
-      finalIcon = iconGreen;
+      finalIcon = iconGreen; // Sẵn sàng (Mặc định)
     }
 
-    // 4. Logic nút bấm
+    // 4. Logic nút bấm (Chỉ Available mới được đặt)
+    // Các trạng thái khác (Booked, In Operation, Maintenance) đều không cho đặt
     var isAvailable =
-      statusNormal === "available" || statusNormal === "san_sang";
+      statusNormal === "available" || statusNormal === "san sang";
+
     var btnStyle = isAvailable
-      ? "cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px;"
+      ? "cursor:pointer; background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px;"
       : "background: #ccc; cursor: not-allowed; color: #666; border: none; padding: 5px 10px; border-radius: 3px;";
 
     // 5. Vẽ Marker
@@ -101,8 +109,8 @@ function initMap(vehicleData) {
 
                 <button onclick="chiDuong(${xe.lat}, ${xe.lng})" 
                     class="popup-btn" 
-                    style="cursor:pointer; background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px;">
-                    🚗 Chỉ đường & Tính giá
+                    style="cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px;">
+                    🚗 Chỉ đường
                 </button>
 
                 <button onclick="${isAvailable ? `window.location.href='${bookingUrl}'` : "return false;"}" 
