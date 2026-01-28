@@ -30,19 +30,42 @@
     ></script>
 
     <script>
-      // Khoi tao map tai toa do TP.HCM
-      var map = L.map("map").setView([10.762622, 106.660172], 13);
-
-      // Them lop nen OpenStreetMap
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      // 1. Khởi tạo map
+      var map = L.map("map").setView([10.762622, 106.660172], 12);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap",
       }).addTo(map);
 
-      // Them marker thu nghiem
-      var marker = L.marker([10.762622, 106.660172]).addTo(map);
-      marker.bindPopup("<b>Xin chao!</b><br>Day la vi tri xe demo").openPopup();
+      var defaultIcon = L.icon({
+          iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+          shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+      });
+
+      // 2. NHẬN DỮ LIỆU TỪ VIEW (Đã sửa lỗi JSON)
+      var vehicles = {{ vehicles_json|safe }};
+
+      console.log("Dữ liệu xe nhận được:", vehicles); // Kiểm tra ở Console xem có data chưa
+
+      // 3. Vòng lặp vẽ xe
+      vehicles.forEach(function (xe) {
+          // Thêm {icon: defaultIcon} để xe hiện hình
+          var marker = L.marker([xe.lat, xe.lng], {icon: defaultIcon}).addTo(map);
+
+          var popupContent = `
+              <div style="text-align: center;">
+                  <h3 style="margin: 0;">${xe.plate}</h3>
+                  <p><b>${xe.name}</b></p>
+                  <p>Trạng thái: <b>${xe.status}</b></p>
+                  <button onclick="alert('Đã chọn xe ${xe.plate}')" style="cursor: pointer; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px;">Đặt xe này</button>
+              </div>
+          `;
+          marker.bindPopup(popupContent);
+      });
     </script>
   </body>
 </html>
