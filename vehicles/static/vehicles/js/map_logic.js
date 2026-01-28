@@ -1,7 +1,7 @@
 // 1. KHAI BÁO BIẾN TOÀN CỤC
 var map;
-var userMarker; // Biến để quản lý cái ghim đỏ (người dùng)
-var currentRoute = null; // Biến để quản lý đường đi đang vẽ
+var userMarker;
+var currentRoute = null;
 
 // Tọa độ mặc định (Chợ Bến Thành)
 var userLat = 10.7721;
@@ -17,9 +17,11 @@ function initMap(vehicleData) {
     attribution: "&copy; OpenStreetMap",
   }).addTo(map);
 
-  // B. Tạo Icon (Xe và User)
-  var carIcon = L.icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  // --- B. ĐỊNH NGHĨA BỘ ICON (MÀU SẮC KHÁC NHAU) ---
+  // Icon cho xe Sẵn sàng (Available) - Màu Xanh Lá
+  var iconGreen = L.icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
     shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -27,8 +29,30 @@ function initMap(vehicleData) {
     shadowSize: [41, 41],
   });
 
+  // Icon cho xe Đã đặt (Booked) - Màu Đỏ (Theo yêu cầu)
+  var iconRed = L.icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
+
+  // Icon cho xe Bảo trì (Maintenance) - Màu Xám
+  var iconGrey = L.icon({
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
+
+  // Icon User - Màu Vàng (Gold) để không bị trùng với xe màu Đỏ
   var userIcon = L.icon({
-    // Dùng icon màu đỏ cho nổi bật
     iconUrl:
       "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
     shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -38,17 +62,38 @@ function initMap(vehicleData) {
     shadowSize: [41, 41],
   });
 
-  // C. Tạo Marker User ở vị trí mặc định trước
+  // C. Tạo Marker User
   userMarker = L.marker([userLat, userLng], { icon: userIcon })
     .addTo(map)
-    .bindPopup("<b>Đang tìm vị trí của bạn...</b>"); // Chưa mở popup vội
+    .bindPopup("<b>Bạn đang ở đây</b>");
 
-  // --- TÍNH NĂNG MỚI: LẤY GPS THỰC TẾ ---
+  // Gọi hàm lấy GPS
   locateUser();
 
-  // D. Vẽ các xe từ dữ liệu Database
+  // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
   vehicleData.forEach(function (xe) {
-    var marker = L.marker([xe.lat, xe.lng], { icon: carIcon }).addTo(map);
+    // --- LOGIC CHỌN MÀU ---
+    var finalIcon;
+    var statusText = xe.status; // Lấy trạng thái
+
+    if (statusText === "booked") {
+      finalIcon = iconRed; // Xe bận -> Đỏ
+    } else if (statusText === "maintenance") {
+      finalIcon = iconGrey; // Bảo trì -> Xám
+    } else {
+      finalIcon = iconGreen; // Còn lại (available) -> Xanh lá
+    }
+
+    var marker = L.marker([xe.lat, xe.lng], { icon: finalIcon }).addTo(map);
+
+    // Chỉ hiện nút "Đặt xe" nếu xe đang Available
+    // Nếu xe bận hoặc bảo trì thì ẩn nút đi (disabled)
+    var btnStyle =
+      "cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px;";
+    if (statusText !== "available") {
+      btnStyle =
+        "background: #ccc; cursor: not-allowed; color: #666; border: none; padding: 5px 10px; border-radius: 3px;";
+    }
 
     var popupContent = `
             <div style="text-align: center;">
@@ -59,13 +104,13 @@ function initMap(vehicleData) {
                 <button onclick="chiDuong(${xe.lat}, ${xe.lng})" 
                     class="popup-btn" 
                     style="cursor:pointer; background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px;">
-                    🚗 Chỉ đường
+                    🚗 Chỉ đường & Tính giá
                 </button>
 
-                <button onclick="alert('Đã chọn xe ${xe.plate}')" 
+                <button onclick="${statusText === "available" ? `alert('Đã chọn xe ${xe.plate}')` : "return false;"}" 
                     class="popup-btn" 
-                    style="cursor:pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px;">
-                    Đặt ngay
+                    style="${btnStyle}">
+                    ${statusText === "available" ? "Đặt ngay" : "Không khả dụng"}
                 </button>
             </div>
         `;
@@ -73,63 +118,68 @@ function initMap(vehicleData) {
   });
 }
 
-// 3. HÀM XỬ LÝ GEOLOCATION (Lấy vị trí thực)
+// 3. HÀM XỬ LÝ GEOLOCATION
 function locateUser() {
-  // Kiểm tra xem trình duyệt có hỗ trợ không
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      // Nếu thành công (User bấm Allow)
       function (position) {
-        // 1. Cập nhật tọa độ mới vào biến toàn cục
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
         console.log("Đã tìm thấy vị trí:", userLat, userLng);
 
-        // 2. Di chuyển marker đỏ đến vị trí mới
         userMarker.setLatLng([userLat, userLng]);
         userMarker.bindPopup("<b>Bạn đang ở đây!</b>").openPopup();
-
-        // 3. Hiệu ứng bay đến vị trí đó (nhìn cho mượt)
-        map.flyTo([userLat, userLng], 14, {
-          duration: 1.5, // Bay trong 1.5 giây
-        });
+        map.flyTo([userLat, userLng], 14, { duration: 1.5 });
       },
-      // Nếu thất bại (User chặn hoặc lỗi)
       function (error) {
-        console.warn("Không lấy được vị trí, dùng mặc định:", error.message);
-        userMarker
-          .bindPopup("<b>Không lấy được GPS</b><br>Đang dùng vị trí mặc định.")
-          .openPopup();
+        console.warn("Lỗi GPS:", error.message);
       },
     );
-  } else {
-    console.error("Trình duyệt không hỗ trợ Geolocation");
   }
 }
 
-// 4. HÀM VẼ ĐƯỜNG (Gọi từ nút bấm trong Popup xe)
+// 4. HÀM VẼ ĐƯỜNG & TÍNH TIỀN
 window.chiDuong = function (destLat, destLng) {
-  console.log("Vẽ đường từ", userLat, userLng, "đến", destLat, destLng);
+  console.log("Đang tính toán đường đi...");
 
-  // Xóa đường cũ nếu có
   if (currentRoute) {
     map.removeControl(currentRoute);
   }
 
-  // Gọi Routing Machine
   currentRoute = L.Routing.control({
-    waypoints: [
-      L.latLng(userLat, userLng), // Luôn dùng tọa độ mới nhất của User
-      L.latLng(destLat, destLng),
-    ],
+    waypoints: [L.latLng(userLat, userLng), L.latLng(destLat, destLng)],
     routeWhileDragging: false,
     showAlternatives: false,
-    show: false, // Tắt bảng chỉ dẫn text
+    show: false, // Tắt bảng chỉ dẫn
     lineOptions: {
       styles: [{ color: "blue", opacity: 0.6, weight: 6 }],
     },
     createMarker: function () {
       return null;
-    }, // Không tạo thêm marker thừa
-  }).addTo(map);
+    },
+  })
+    .on("routesfound", function (e) {
+      // --- LOGIC LẤY KHOẢNG CÁCH ---
+      var routes = e.routes;
+      var summary = routes[0].summary;
+
+      // summary.totalDistance: đơn vị là mét (m)
+      var distanceInKm = (summary.totalDistance / 1000).toFixed(2); // Đổi ra km, lấy 2 số lẻ
+
+      // Ví dụ: Giá cước 15.000 VNĐ / km
+      var pricePerKm = 15000;
+      var estimatedPrice = Math.round(distanceInKm * pricePerKm);
+
+      // Format tiền tệ cho đẹp (ví dụ: 200.000)
+      var formattedPrice = estimatedPrice.toLocaleString("vi-VN");
+
+      // Hiển thị thông báo (Sau này bạn có thể gán vào thẻ HTML thay vì alert)
+      alert(
+        `🚗 Quãng đường: ${distanceInKm} km\n💰 Ước tính chi phí di chuyển đến xe: ${formattedPrice} VNĐ`,
+      );
+
+      console.log("Khoảng cách (m):", summary.totalDistance);
+      console.log("Thời gian (giây):", summary.totalTime);
+    })
+    .addTo(map);
 };
