@@ -10,6 +10,11 @@
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+    />
+
     <style>
       body {
         margin: 0;
@@ -28,40 +33,85 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
-      // 1. Khởi tạo map
-      var map = L.map("map").setView([10.762622, 106.660172], 12);
+      // 1. Khởi tạo bản đồ
+      var map = L.map("map").setView([10.762622, 106.660172], 13);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap",
       }).addTo(map);
 
-      var defaultIcon = L.icon({
+      // --- ICON CẤU HÌNH ---
+      var carIcon = L.icon({
           iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
           shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
+          iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
       });
 
-      // 2. NHẬN DỮ LIỆU TỪ VIEW (Đã sửa lỗi JSON)
+      // Icon riêng cho Người dùng (Màu đỏ để phân biệt)
+      // Chúng ta dùng filter hue-rotate để đổi màu icon mặc định sang đỏ
+      var userIcon = L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+          shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+          iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      });
+
+      // 2. GIẢ LẬP VỊ TRÍ NGƯỜI DÙNG
+      var userLat = 10.7721;
+      var userLng = 106.6983;
+      L.marker([userLat, userLng], {icon: userIcon}).addTo(map)
+          .bindPopup("<b>Vị trí của bạn</b>").openPopup();
+
+      // Biến lưu trữ đường đi hiện tại (để xóa đi khi chọn đường mới)
+      var currentRoute = null;
+
+      // --- HÀM VẼ ĐƯỜNG (CORE ITS FEATURE) ---
+      function chiDuong(destLat, destLng) {
+          // Nếu đã có đường vẽ rồi thì xóa đi để vẽ đường mới
+          if (currentRoute) {
+              map.removeControl(currentRoute);
+          }
+
+          // Gọi plugin Routing Machine để vẽ đường
+          currentRoute = L.Routing.control({
+              waypoints: [
+                  L.latLng(userLat, userLng), // Điểm xuất phát (User)
+                  L.latLng(destLat, destLng)  // Điểm đích (Xe)
+              ],
+              routeWhileDragging: false,
+              // Tắt hướng dẫn chi tiết bằng chữ
+              showAlternatives: false,
+              lineOptions: {
+                  styles: [{color: 'blue', opacity: 0.6, weight: 6}]
+              },
+              createMarker: function() { return null; } // Không tạo thêm marker thừa
+          }).addTo(map);
+      }
+
+      // 3. HIỂN THỊ XE TỪ DỮ LIỆU
       var vehicles = {{ vehicles_json|safe }};
 
-      console.log("Dữ liệu xe nhận được:", vehicles); // Kiểm tra ở Console xem có data chưa
-
-      // 3. Vòng lặp vẽ xe
       vehicles.forEach(function (xe) {
-          // Thêm {icon: defaultIcon} để xe hiện hình
-          var marker = L.marker([xe.lat, xe.lng], {icon: defaultIcon}).addTo(map);
+          var marker = L.marker([xe.lat, xe.lng], {icon: carIcon}).addTo(map);
 
+          // Nội dung Popup có thêm nút "Chỉ đường"
           var popupContent = `
               <div style="text-align: center;">
-                  <h3 style="margin: 0;">${xe.plate}</h3>
-                  <p><b>${xe.name}</b></p>
+                  <h3 style="margin: 0; color: #007bff;">${xe.plate}</h3>
+                  <p style="margin: 5px 0;"><b>${xe.name}</b></p>
                   <p>Trạng thái: <b>${xe.status}</b></p>
-                  <button onclick="alert('Đã chọn xe ${xe.plate}')" style="cursor: pointer; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px;">Đặt xe này</button>
+
+                  <button onclick="chiDuong(${xe.lat}, ${xe.lng})"
+                      style="cursor: pointer; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; margin-right: 5px;">
+                      🚗 Chỉ đường
+                  </button>
+
+                  <button onclick="alert('Đã gửi yêu cầu đặt xe!')"
+                      style="cursor: pointer; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px;">
+                      Đặt ngay
+                  </button>
               </div>
           `;
           marker.bindPopup(popupContent);
