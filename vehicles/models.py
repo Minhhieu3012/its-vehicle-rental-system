@@ -24,7 +24,7 @@ class Vehicle(models.Model):
         unique=True
     )
 
-    owner = models.ForeignKey(
+    customer = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='vehicles'
