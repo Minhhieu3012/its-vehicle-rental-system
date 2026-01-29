@@ -4,6 +4,8 @@ from users.models import User
 
 class Vehicle(models.Model):
 
+    # id = models.AutoField(primary_key=True) Django tự động tạo
+
     STATUS_CHOICES = [
         ('available', 'Available'),       # Xe sẵn sàng
         ('booked', 'Booked'),             # Đã đặt, chưa nhận
