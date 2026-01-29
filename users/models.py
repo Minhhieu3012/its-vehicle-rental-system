@@ -21,7 +21,7 @@ class User(AbstractUser):
         blank=True
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)  Kế thừa từ users của django có sẵn date_joined
 
     def __str__(self):
         return self.username
