@@ -1,47 +1,46 @@
 from django.shortcuts import render
+from django.http import JsonResponse
+from .models import Vehicle
 import json
 
-# Create your views here.
+# --- API cho Frontend/Mobile gọi qua Ajax ---
+def vehicle_list_api(request):
+    """
+    API trả về danh sách xe dạng JSON lấy từ Database
+    """
+    vehicles = Vehicle.objects.all()
+    data = []
+    for v in vehicles:
+        data.append({
+            'id': v.id,
+            'name': v.name,
+            'license_plate': v.license_plate,
+            'lat': float(v.latitude), # Đảm bảo là số để bản đồ đọc được
+            'lng': float(v.longitude),
+            'price': float(v.price_per_hour),
+            'status': v.status,
+            'image_url': v.image.url if v.image else ''
+        })
+    return JsonResponse({'vehicles': data})
+
+# --- View để render trang Bản đồ ---
 def map_view(request):
-    vehicles_list = [
-        {
-            'id': 1,
-            'plate': '59A-123.45',
-            'lat': 10.762622,
-            'lng': 106.660172,
-            'status': 'available', 
-            'name': 'VinFast Lux A2.0'
-        },
+    """
+    Lấy dữ liệu thật từ DB và truyền sang template map.html
+    """
+    vehicles = Vehicle.objects.all()
+    vehicles_list = []
+    
+    for v in vehicles:
+        vehicles_list.append({
+            'id': v.id,
+            'name': v.name,
+            'plate': v.license_plate,
+            'lat': float(v.latitude),
+            'lng': float(v.longitude),
+            'status': v.status,
+        })
 
-        {
-            'id': 2,
-            'plate': '51H-999.99',
-            'lat': 10.776000,
-            'lng': 106.701000,
-            'status': 'booked', 
-            'name': 'Toyota Camry'
-        },
-
-        {
-            'id': 3,
-            'plate': '30E-111.22',
-            'lat': 10.800000,
-            'lng': 106.650000,
-            'status': 'in operation', 
-            'name': 'Honda City'
-        },
-
-        {
-            'id': 4,
-            'plate': '70F-333.44',
-            'lat': 10.730000,
-            'lng': 106.680000,
-            'status': 'maintenance', 
-            'name': 'Ford Focus'
-        }
-    ]
-
-    # Truyen du lieu sang HTML 
     context = {
         'vehicles_json': json.dumps(vehicles_list)
     }
