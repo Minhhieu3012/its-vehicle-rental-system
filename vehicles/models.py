@@ -5,9 +5,16 @@ from users.models import User
 class Vehicle(models.Model):
 
     STATUS_CHOICES = [
-        ('available', 'Available'),
-        ('rented', 'Rented'),
-        ('maintenance', 'Maintenance'),
+        ('available', 'Available'),       # Xe sẵn sàng
+        ('booked', 'Booked'),             # Đã đặt, chưa nhận
+        ('in_use', 'In Use'),              # Đang sử dụng
+        ('maintenance', 'Maintenance'),   # Bảo trì
+    ]
+
+    VEHICLE_TYPE_CHOICES = [
+        ('bike', 'Bike'),
+        ('car_4', 'Car 4 seats'),
+        ('car_7', 'Car 7 seats'),
     ]
 
     name = models.CharField(max_length=100)
@@ -23,6 +30,12 @@ class Vehicle(models.Model):
         related_name='vehicles'
     )
 
+    vehicle_type = models.CharField(
+        max_length=20,
+        choices=VEHICLE_TYPE_CHOICES,
+        default='bike'
+    )
+
     price_per_day = models.DecimalField(
         max_digits=10,
         decimal_places=2
@@ -32,6 +45,23 @@ class Vehicle(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default='available'
+    )
+
+    latitude = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    longitude = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+
+    image = models.ImageField(
+        upload_to='vehicles/',
+        null=True,
+        blank=True
     )
 
     description = models.TextField(
