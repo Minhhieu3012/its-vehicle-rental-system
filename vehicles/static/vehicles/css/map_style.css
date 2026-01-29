@@ -1,0 +1,140 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  height: 100vh;
+  width: 100%;
+}
+
+.popup-btn {
+  cursor: pointer;
+  padding: 5px 10px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  margin-top: 5px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  display: none; /* Mặc định ẩn */
+  position: fixed;
+  z-index: 9999; /* Phải cao hơn bản đồ Leaflet (thường là 400-1000) */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Màu nền đen mờ */
+  backdrop-filter: blur(2px); /* Hiệu ứng làm mờ nền sau */
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto; /* Cách trên 5%, canh giữa */
+  width: 90%;
+  max-width: 500px; /* Không quá to trên màn hình lớn */
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  background: #007bff;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.close-btn {
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 60vh; /* Giới hạn chiều cao để scroll */
+  overflow-y: auto;
+}
+
+/* Box hiển thị giá tiền */
+.summary-box {
+  background: #f8f9fa;
+  border-left: 5px solid #28a745;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Danh sách hướng dẫn đi đường */
+.instruction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instruction-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.instruction-list li:last-child {
+  border-bottom: none;
+}
+
+.instruction-icon {
+  margin-right: 10px;
+  font-size: 20px;
+  color: #666;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  background: #f1f1f1;
+  text-align: right;
+}
+
+.btn-confirm {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-cancel {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
