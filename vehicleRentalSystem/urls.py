@@ -16,7 +16,11 @@ Including another URLconf
 """
 
 from django.contrib import admin
+<<<<<<< HEAD
 from django.urls import path, include
+=======
+from django.urls import path
+>>>>>>> origin/db
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -25,7 +29,12 @@ urlpatterns = [
     path('bookings/', include('bookings.urls')),
     path('vehicles/', include('vehicles.urls')),
 ]
+<<<<<<< HEAD
 
 # DEBUG 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+=======
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+>>>>>>> origin/db
