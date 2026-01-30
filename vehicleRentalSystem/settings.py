@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'users',      # Quản lý User
     'bookings',   # Quản lý Đặt xe
     'vehicles',   # Quản lý Xe & Map
-    'reviews',    # Quản lý Đánh giá (Lấy từ nhánh Dev/Auxiliary)
+   
     
     # App Giao diện (Lấy từ nhánh Frontend)
     'frontend',   
