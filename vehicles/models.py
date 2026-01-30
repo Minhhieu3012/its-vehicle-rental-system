@@ -26,12 +26,6 @@ class Vehicle(models.Model):
         unique=True
     )
 
-    customer = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='vehicles'
-    )
-
     vehicle_type = models.CharField(
         max_length=20,
         choices=VEHICLE_TYPE_CHOICES,
