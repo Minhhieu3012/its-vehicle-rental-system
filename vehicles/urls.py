@@ -20,4 +20,8 @@ urlpatterns = [
     
     # API: Lấy rating của xe
     path('api/vehicles/<int:vehicle_pk>/rating/', views.get_vehicle_rating, name='get_vehicle_rating'),
+
+    path('api/list/', views.vehicle_list_api, name='vehicle_list_api'),
+    path('map/', views.map_view, name='map'),
 ]
+
