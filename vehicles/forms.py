@@ -1,5 +1,6 @@
 from django import forms
-from .models import Review, VehicleImage, Vehicle
+from .models import VehicleImage, Vehicle
+from reviews.models import Review
 
 class ReviewForm(forms.ModelForm):
     """Form để người dùng đánh giá xe (Giữ nguyên)"""

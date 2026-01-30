@@ -9,8 +9,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 import random 
 
-from .models import Vehicle, Review, VehicleImage
+from .models import Vehicle, VehicleImage
 from .forms import ReviewForm, VehicleImageForm
+from reviews.models import Review
 
 # ============== 1. API LIST & DETAIL (GỘP CẢ 2 NHÁNH) ==============
 
