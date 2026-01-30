@@ -1,0 +1,107 @@
+﻿{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container detail-container">
+    <div class="detail-grid">
+        <div class="image-section">
+            {% if vehicle.image %}
+            <img src="{{ vehicle.image.url }}" alt="{{ vehicle.name }}">
+            {% else %}
+            <img src="{% static 'frontend/images/default-car.png' %}" alt="Default Car">
+            {% endif %}
+        </div>
+
+        <div class="info-section">
+            <h1>{{ vehicle.name }}</h1>
+            <p class="plate">Biển số: {{ vehicle.license_plate }}</p>
+            <p class="price">Giá thuê: <strong>{{ vehicle.price_per_day|floatformat:0 }} VNĐ / ngày</strong></p>
+
+            <div class="description">
+                <h4>Mô tả xe:</h4>
+                <p>{{ vehicle.description|default:"Chưa có mô tả chi tiết cho xe này." }}</p>
+            </div>
+
+            <hr>
+
+            <form action="{% url 'frontend:create_booking' vehicle.id %}" method="POST" class="booking-form">
+                {% csrf_token %}
+                <div class="date-inputs">
+                    <div class="form-group">
+                        <label>Ngày nhận xe:</label>
+                        <input type="date" name="start_date" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày trả xe:</label>
+                        <input type="date" name="end_date" required class="form-control">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-book"
+                        {% if vehicle.status !='available' %} disabled {% endif %}>
+                    {% if vehicle.status == 'available' %}
+                    Xác nhận đặt xe
+                    {% else %}
+                    Xe hiện không sẵn sàng
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+
+    .image-section img {
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .price {
+        font-size: 24px;
+        color: #28a745;
+        margin: 20px 0;
+    }
+
+    .booking-form {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+
+    .date-inputs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .btn-book {
+        width: 100%;
+        padding: 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .btn-book:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+</style>
+{% endblock %}

@@ -4,6 +4,7 @@ from . import views
 app_name = 'vehicles'
 
 urlpatterns = [
+
     # API: Danh sách xe
     path('api/vehicles/', views.vehicle_list_api, name='vehicle_list_api'),
     

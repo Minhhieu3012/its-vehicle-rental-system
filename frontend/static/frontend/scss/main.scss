@@ -1,0 +1,436 @@
+﻿// ==========================================
+// MAIN.SCSS - File tổng import tất cả modules
+// ==========================================
+
+// 1. Variables & Mixins (luôn import đầu tiên)
+@use 'variables' as *;
+
+// 2. Components
+@use 'components';
+
+// 3. Page-specific styles
+@use 'pages';
+
+// ==========================================
+// GLOBAL STYLES
+// ==========================================
+
+// Reset & Base Styles
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: $font-family-base;
+    font-size: $font-size-md;
+    line-height: $line-height-normal;
+    background-color: $bg-light;
+    color: $text-primary;
+    transition: background-color $transition-base, color $transition-base;
+    overflow-x: hidden;
+
+    &.dark {
+        background-color: $bg-dark;
+        color: $white;
+    }
+}
+
+// Dark Mode Support
+.dark {
+    color-scheme: dark;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+    font-weight: $font-weight-bold;
+    line-height: $line-height-tight;
+    margin-bottom: $spacing-4;
+    color: $text-primary;
+
+    .dark & {
+        color: $white;
+    }
+}
+
+p {
+    margin-bottom: $spacing-4;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color $transition-base;
+
+    &:hover {
+        color: $primary;
+    }
+}
+
+// Images
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+// Lists
+ul, ol {
+    list-style: none;
+}
+
+// Buttons
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+// Forms
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+// Material Symbols Icons
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    user-select: none;
+}
+
+// Utility Classes
+.container {
+    width: 100%;
+    max-width: $container-max-width;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
+
+    &-lg {
+        max-width: $container-max-width-lg;
+    }
+
+    &-sm {
+        max-width: $container-max-width-sm;
+    }
+}
+
+// Display Utilities
+.d-none {
+    display: none !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+@media (min-width: $breakpoint-md) {
+    .d-md-none {
+        display: none !important;
+    }
+
+    .d-md-block {
+        display: block !important;
+    }
+
+    .d-md-flex {
+        display: flex !important;
+    }
+}
+
+@media (min-width: $breakpoint-lg) {
+    .d-lg-none {
+        display: none !important;
+    }
+
+    .d-lg-block {
+        display: block !important;
+    }
+
+    .d-lg-flex {
+        display: flex !important;
+    }
+}
+
+// Text Alignment
+.text-left {
+    text-align: left !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+// Spacing Utilities
+.mt-auto {
+    margin-top: auto !important;
+}
+
+.mb-auto {
+    margin-bottom: auto !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+// Flexbox Utilities
+.flex-1 {
+    flex: 1 !important;
+}
+
+.flex-grow {
+    flex-grow: 1 !important;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0 !important;
+}
+
+.items-center {
+    align-items: center !important;
+}
+
+.justify-center {
+    justify-content: center !important;
+}
+
+.justify-between {
+    justify-content: space-between !important;
+}
+
+.gap-2 {
+    gap: $spacing-2 !important;
+}
+
+.gap-4 {
+    gap: $spacing-4 !important;
+}
+
+// Overflow
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
+.overflow-x-hidden {
+    overflow-x: hidden !important;
+}
+
+.overflow-y-auto {
+    overflow-y: auto !important;
+}
+
+// Position
+.relative {
+    position: relative !important;
+}
+
+.absolute {
+    position: absolute !important;
+}
+
+.fixed {
+    position: fixed !important;
+}
+
+.sticky {
+    position: sticky !important;
+}
+
+// Z-Index
+.z-10 {
+    z-index: $z-dropdown !important;
+}
+
+.z-20 {
+    z-index: $z-sticky !important;
+}
+
+.z-40 {
+    z-index: $z-modal-backdrop !important;
+}
+
+.z-50 {
+    z-index: $z-modal !important;
+}
+
+// Width & Height
+.w-full {
+    width: 100% !important;
+}
+
+.h-full {
+    height: 100% !important;
+}
+
+.min-h-screen {
+    min-height: 100vh !important;
+}
+
+// Scrollbar Styling
+.custom-scrollbar {
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $slate-200;
+        border-radius: $radius-full;
+
+        .dark & {
+            background: $slate-700;
+        }
+
+        &:hover {
+            background: $slate-300;
+
+            .dark & {
+                background: $slate-600;
+            }
+        }
+    }
+}
+
+// Animation Utilities
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn $transition-slow ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft $transition-slow ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight $transition-slow ease-out;
+}
+
+// Loading States
+.skeleton {
+    background: linear-gradient(90deg, $gray-200 25%, $gray-100 50%, $gray-200 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+
+    .dark & {
+        background: linear-gradient(90deg, $slate-700 25%, $slate-600 50%, $slate-700 75%);
+        background-size: 200% 100%;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// Focus Visible (Accessibility)
+*:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+}
+
+// Selection
+::selection {
+    background-color: rgba($primary, 0.2);
+    color: $text-primary;
+
+    .dark & {
+        background-color: rgba($primary, 0.3);
+        color: $white;
+    }
+}
+
+// Print Styles
+@media print {
+    .no-print,
+    .navbar,
+    .footer,
+    .btn,
+    button {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    a {
+        text-decoration: underline;
+    }
+}

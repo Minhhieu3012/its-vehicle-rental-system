@@ -1,0 +1,42 @@
+﻿{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Trang chủ - XeRental{% endblock %}
+
+{% block content %}
+<section class="home-hero">
+    <div class="home-hero__banner" style='background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url("{% static "assets/hero-bg.jpg" %}");'>
+        <div class="home-hero__content">
+            <h1 class="home-hero__title">
+                Hành trình của bạn, <br>
+                <span class="highlight">Phương tiện của chúng tôi</span>
+            </h1>
+            <p class="home-hero__description">Khám phá những điểm đến tuyệt vời.</p>
+        </div>
+
+        <div class="home-hero__search">
+            <form class="search-form" method="GET" action="/vehicles/">
+                <div class="search-form__field">
+                    <label>Địa điểm nhận xe</label>
+                    <div class="search-form__input-wrapper">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <select name="location">
+                            <option>TP. Hồ Chí Minh</option>
+                            <option>Hà Nội</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary search-form__submit">Tìm kiếm ngay</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="popular-vehicles">
+    <div class="section-header">
+        <h2 class="section-title">Xe phổ biến nhất</h2>
+    </div>
+    <div class="vehicles-grid">
+    </div>
+</section>
+{% endblock %}

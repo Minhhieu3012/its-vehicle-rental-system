@@ -6,6 +6,7 @@ __pycache__/
 *.pyd
 *.log
 *.pot
+*.pyc
 
 pycache/
 *.py[cod]
@@ -40,6 +41,9 @@ htmlcov/
 .tox/
 .pytest_cache/
 
+.vs/
+
+
 venv/
 env/
 
@@ -50,3 +54,4 @@ __pycache__/
 *.pyd
 
 **/migrations/__pycache__
+

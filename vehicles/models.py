@@ -1,4 +1,5 @@
 from django.db import models
+
 # Ưu tiên dùng User từ app users nếu dự án đã cấu hình, nếu chưa thì đổi thành django.contrib.auth.models
 from users.models import User 
 
@@ -41,6 +42,12 @@ class Vehicle(models.Model):
         default='bike'
     )
 
+    vehicle_type = models.CharField(
+        max_length=20,
+        choices=VEHICLE_TYPE_CHOICES,
+        default='bike'
+    )
+
     price_per_day = models.DecimalField(
         max_digits=10,
         decimal_places=2
@@ -52,9 +59,15 @@ class Vehicle(models.Model):
         default='available'
     )
 
-    # --- TỌA ĐỘ CHO BẢN ĐỒ ---
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    
+    image = models.ImageField(upload_to='vehicles/', null=True, blank=True)
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
 
     image = models.ImageField(upload_to='vehicles/', null=True, blank=True)
     
@@ -62,6 +75,7 @@ class Vehicle(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+
         return f"{self.name} - {self.license_plate}"
 
 # ==========================================
