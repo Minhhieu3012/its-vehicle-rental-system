@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 *.log
 *.pot
+*.pyc
 
 # Django stuff
 *.sqlite3

@@ -23,11 +23,15 @@ urlpatterns = [
     # Đường dẫn quản trị hệ thống
     path('admin/', admin.site.urls),
     
-    # Kết nối tới app frontend của bạn (Điều phối Trang chủ, Đăng ký, Bản đồ)
-    path('', include('frontend.urls')),  
+    # 1. App Vehicles (Nơi chứa Bản đồ Map & Logic xe)
+    path('vehicles/', include('vehicles.urls')),
+
+    # 2. App Bookings (Nơi xử lý đặt xe)
+    path('bookings/', include('bookings.urls')),
+
+    # 3. App Frontend (Giao diện chính - Để cuối cùng để bắt đường dẫn gốc '')
+    path('', include('frontend.urls')),
 ]
 
-# Cấu hình để xem được ảnh GPLX (Module Bảo) và ảnh xe (Module Hiếu) trực tiếp trên trình duyệt
-# Chỉ hoạt động khi DEBUG = True trong file settings.py
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

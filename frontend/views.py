@@ -7,31 +7,35 @@ from bookings.models import Booking
 import json
 
 def home_view(request):
-    """Hiển thị bản đồ ITS và 4 xe mới nhất của Bảo"""
-    latest_vehicles = Vehicle.objects.all().order_by('-created_at')[:4]
+    """Hiển thị bản đồ ITS và 4 xe mới nhất"""
+    latest_vehicles = Vehicle.objects.exclude(image='').order_by('-created_at')[:4]
     return render(request, 'frontend/pages/home.html', {'vehicles': latest_vehicles})
 
 def payment_view(request, vehicle_id):
-    """Màn hình Secure Payment - Tóm tắt chuyến đi và Form thanh toán"""
+    """Màn hình Secure Payment"""
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    # Logic tính toán sơ bộ (giả định thuê 1 ngày)
     context = {
         'vehicle': vehicle,
-        'total_price': vehicle.price_per_day + 5.00 # Giá xe + phí dịch vụ
+        'total_price': float(vehicle.price_per_day) + 5.00 # Ép kiểu float để tránh lỗi cộng
     }
     return render(request, 'frontend/pages/payment.html', context)
 
 def vehicle_list_view(request):
-    """Tích hợp toàn bộ xe và nạp dữ liệu JSON cho Marker bản đồ của Hiếu"""
+    """Tích hợp toàn bộ xe và nạp dữ liệu JSON cho Marker bản đồ"""
     vehicles_qs = Vehicle.objects.all()
-    # Chuyển đổi dữ liệu sang JSON để Javascript của Leaflet có thể đọc
-    vehicles_list = [{
-        'id': v.id,
-        'name': v.name,
-        'lat': 10.762622, # Tọa độ mặc định dự án (có thể lấy từ model nếu Hiếu đã thêm field)
-        'lng': 106.660172,
-        'price': float(v.price_per_day)
-    } for v in vehicles_qs]
+    
+    vehicles_list = []
+    for v in vehicles_qs:
+        # Chỉ lấy xe có tọa độ để tránh lỗi bản đồ
+        if v.latitude and v.longitude:
+            vehicles_list.append({
+                'id': v.id,
+                'name': v.name,
+                'lat': float(v.latitude), # Lấy từ DB
+                'lng': float(v.longitude), # Lấy từ DB
+                'price': float(v.price_per_day),
+                'status': v.status
+            })
 
     context = {
         'vehicles': vehicles_qs,
@@ -40,7 +44,7 @@ def vehicle_list_view(request):
     return render(request, 'frontend/pages/vehicle_list.html', context)
 
 def register_view(request):
-    """Xử lý đăng ký tài khoản và GPLX"""
+    """Xử lý đăng ký"""
     if request.method == 'POST':
         form = RegisterForm(request.POST, request.FILES)
         if form.is_valid():
@@ -55,12 +59,10 @@ def register_view(request):
     return render(request, 'frontend/pages/register.html', {'form': form})
 
 def vehicle_detail_view(request, pk):
-    """Chi tiết xe của Bảo"""
     vehicle = get_object_or_404(Vehicle, pk=pk)
     return render(request, 'frontend/pages/vehicle_detail.html', {'vehicle': vehicle})
 
 def create_booking_view(request, vehicle_id):
-    """Xác nhận thanh toán và lưu vào DB Bookings"""
     if request.method == 'POST':
         vehicle = get_object_or_404(Vehicle, id=vehicle_id)
         Booking.objects.create(
@@ -69,7 +71,8 @@ def create_booking_view(request, vehicle_id):
             start_date=request.POST.get('start_date'),
             end_date=request.POST.get('end_date'),
             total_price=vehicle.price_per_day,
-            status='pending' # Chờ Admin duyệt
+            status='pending'
         )
-        messages.success(request, "Giao dịch thành công! Yêu cầu của bạn đang được xét duyệt.")
+        messages.success(request, "Giao dịch thành công! Đang chờ duyệt.")
         return redirect('frontend:home')
+    return redirect('frontend:home')
