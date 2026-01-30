@@ -1,182 +1,436 @@
-﻿// 1. VARIABLES
-$primary: #1392ec;
-$primary-hover: #0d7cd1;
-$bg-light: #f6f7f8;
-$slate-200: #e2e8f0;
-$slate-500: #64748b;
-$slate-900: #0f172a;
-$font-main: 'Inter', sans-serif;
+﻿// ==========================================
+// MAIN.SCSS - File tổng import tất cả modules
+// ==========================================
 
-// 2. MIXINS
-@mixin shadow-floating {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
+// 1. Variables & Mixins (luôn import đầu tiên)
+@use 'variables' as *;
 
-// 3. BASE STYLES
-body {
-    font-family: $font-main;
-    background-color: $bg-light;
-    color: $slate-900;
+// 2. Components
+@use 'components';
+
+// 3. Page-specific styles
+@use 'pages';
+
+// ==========================================
+// GLOBAL STYLES
+// ==========================================
+
+// Reset & Base Styles
+*,
+*::before,
+*::after {
     margin: 0;
-    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: $font-family-base;
+    font-size: $font-size-md;
+    line-height: $line-height-normal;
+    background-color: $bg-light;
+    color: $text-primary;
+    transition: background-color $transition-base, color $transition-base;
+    overflow-x: hidden;
+
+    &.dark {
+        background-color: $bg-dark;
+        color: $white;
+    }
+}
+
+// Dark Mode Support
+.dark {
+    color-scheme: dark;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+    font-weight: $font-weight-bold;
+    line-height: $line-height-tight;
+    margin-bottom: $spacing-4;
+    color: $text-primary;
+
+    .dark & {
+        color: $white;
+    }
+}
+
+p {
+    margin-bottom: $spacing-4;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color $transition-base;
+
+    &:hover {
+        color: $primary;
+    }
+}
+
+// Images
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+// Lists
+ul, ol {
+    list-style: none;
+}
+
+// Buttons
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+// Forms
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+// Material Symbols Icons
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    user-select: none;
+}
+
+// Utility Classes
 .container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-// 4. HERO SECTION - Căn giữa nội dung trên nền xanh chủ đạo
-.hero-section {
-    position: relative;
-    background: $primary;
-    border-radius: 2rem;
-    height: 500px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: white;
-    margin-top: 1.5rem;
-
-    h1 {
-        font-size: 4rem;
-        font-weight: 900;
-        margin-bottom: 1rem;
-        letter-spacing: -0.05em;
-        line-height: 1.1;
-    }
-
-    p {
-        font-size: 1.25rem;
-        opacity: 0.9;
-        max-width: 650px;
-        line-height: 1.6;
-    }
-}
-
-// 5. SEARCH INTERFACE - Ép dàn hàng ngang & Thêm vách ngăn (Giống hình số 2)
-.search-container {
-    display: flex;
-    justify-content: center;
-    position: relative;
-    z-index: 100;
-    margin-top: -3.5rem; // Đẩy nổi lên trên nền xanh
-    padding: 0 1rem;
-}
-
-.search-bar {
-    background: #ffffff;
-    padding: 0.5rem;
-    border-radius: 1.5rem;
-    display: flex; // Ép các mục nằm trên một hàng ngang
-    align-items: center;
     width: 100%;
-    max-width: 1100px;
-    @include shadow-floating;
-    border: 1px solid $slate-200;
+    max-width: $container-max-width;
+    margin: 0 auto;
+    padding: 0 $spacing-4;
 
-    .search-input {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1.5rem;
-        border-right: 1px solid #e5e7eb; // Vách ngăn tinh tế giữa các vùng
+    &-lg {
+        max-width: $container-max-width-lg;
+    }
 
-        &:last-of-type {
-            border-right: none; // Mục cuối cùng không có vách ngăn trước nút Search
+    &-sm {
+        max-width: $container-max-width-sm;
+    }
+}
+
+// Display Utilities
+.d-none {
+    display: none !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+@media (min-width: $breakpoint-md) {
+    .d-md-none {
+        display: none !important;
+    }
+
+    .d-md-block {
+        display: block !important;
+    }
+
+    .d-md-flex {
+        display: flex !important;
+    }
+}
+
+@media (min-width: $breakpoint-lg) {
+    .d-lg-none {
+        display: none !important;
+    }
+
+    .d-lg-block {
+        display: block !important;
+    }
+
+    .d-lg-flex {
+        display: flex !important;
+    }
+}
+
+// Text Alignment
+.text-left {
+    text-align: left !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+// Spacing Utilities
+.mt-auto {
+    margin-top: auto !important;
+}
+
+.mb-auto {
+    margin-bottom: auto !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+// Flexbox Utilities
+.flex-1 {
+    flex: 1 !important;
+}
+
+.flex-grow {
+    flex-grow: 1 !important;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0 !important;
+}
+
+.items-center {
+    align-items: center !important;
+}
+
+.justify-center {
+    justify-content: center !important;
+}
+
+.justify-between {
+    justify-content: space-between !important;
+}
+
+.gap-2 {
+    gap: $spacing-2 !important;
+}
+
+.gap-4 {
+    gap: $spacing-4 !important;
+}
+
+// Overflow
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
+.overflow-x-hidden {
+    overflow-x: hidden !important;
+}
+
+.overflow-y-auto {
+    overflow-y: auto !important;
+}
+
+// Position
+.relative {
+    position: relative !important;
+}
+
+.absolute {
+    position: absolute !important;
+}
+
+.fixed {
+    position: fixed !important;
+}
+
+.sticky {
+    position: sticky !important;
+}
+
+// Z-Index
+.z-10 {
+    z-index: $z-dropdown !important;
+}
+
+.z-20 {
+    z-index: $z-sticky !important;
+}
+
+.z-40 {
+    z-index: $z-modal-backdrop !important;
+}
+
+.z-50 {
+    z-index: $z-modal !important;
+}
+
+// Width & Height
+.w-full {
+    width: 100% !important;
+}
+
+.h-full {
+    height: 100% !important;
+}
+
+.min-h-screen {
+    min-height: 100vh !important;
+}
+
+// Scrollbar Styling
+.custom-scrollbar {
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $slate-200;
+        border-radius: $radius-full;
+
+        .dark & {
+            background: $slate-700;
         }
 
-        .material-symbols-outlined {
-            color: $primary;
-            font-size: 1.5rem;
-            font-variation-settings: 'FILL' 1;
-        }
+        &:hover {
+            background: $slate-300;
 
-        input, select {
-            border: none;
-            outline: none;
-            width: 100%;
-            font-family: $font-main;
-            font-size: 1rem;
-            font-weight: 600; // Chữ đậm rõ nét như bạn yêu cầu
-            color: $slate-900;
-            background: transparent;
-            cursor: pointer;
-
-            &::placeholder {
-                color: $slate-500;
-                font-weight: 400;
+            .dark & {
+                background: $slate-600;
             }
         }
     }
+}
 
-    .btn-search {
-        background: $primary;
-        color: #ffffff;
-        padding: 1rem 2.5rem;
-        border-radius: 1.25rem;
-        font-weight: 800;
-        font-size: 1rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        margin-left: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+// Animation Utilities
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
 
-        &:hover {
-            background: $primary-hover;
-            transform: scale(1.03);
-            box-shadow: 0 10px 15px -3px rgba(19, 146, 236, 0.3);
-        }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-// 6. VEHICLE CARD
-.vehicle-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
-    margin: 4rem 0;
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
-.vehicle-card {
-    background: white;
-    border-radius: 1.5rem;
-    border: 1px solid $slate-200;
-    overflow: hidden;
-    transition: 0.4s;
-
-    &:hover {
-        transform: translateY(-12px);
-        @include shadow-floating;
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
     }
 
-    .card-img {
-        height: 200px;
-        background-size: cover;
-        background-position: center;
-        position: relative;
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
-        .badge {
-            position: absolute;
-            top: 1.25rem;
-            left: 1.25rem;
-            background: #10b981;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 900;
-        }
+.animate-fade-in {
+    animation: fadeIn $transition-slow ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft $transition-slow ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight $transition-slow ease-out;
+}
+
+// Loading States
+.skeleton {
+    background: linear-gradient(90deg, $gray-200 25%, $gray-100 50%, $gray-200 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+
+    .dark & {
+        background: linear-gradient(90deg, $slate-700 25%, $slate-600 50%, $slate-700 75%);
+        background-size: 200% 100%;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
     }
 
-    .card-body {
-        padding: 1.5rem;
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// Focus Visible (Accessibility)
+*:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+}
+
+// Selection
+::selection {
+    background-color: rgba($primary, 0.2);
+    color: $text-primary;
+
+    .dark & {
+        background-color: rgba($primary, 0.3);
+        color: $white;
+    }
+}
+
+// Print Styles
+@media print {
+    .no-print,
+    .navbar,
+    .footer,
+    .btn,
+    button {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    a {
+        text-decoration: underline;
     }
 }

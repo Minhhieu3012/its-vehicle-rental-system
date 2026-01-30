@@ -20,18 +20,25 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    # Đường dẫn quản trị hệ thống
+    # 1. Đường dẫn quản trị hệ thống (Mặc định của Django)
     path('admin/', admin.site.urls),
     
-    # 1. App Vehicles (Nơi chứa Bản đồ Map & Logic xe)
+    # 2. App Vehicles (Quản lý danh sách xe, chi tiết xe và bản đồ ITS)
+    # App này sẽ xử lý các đường dẫn như /vehicles/ và /vehicles/1/
     path('vehicles/', include('vehicles.urls')),
 
-    # 2. App Bookings (Nơi xử lý đặt xe)
+    # 3. App Bookings (Xử lý logic đặt xe và lịch sử giao dịch)
+    # App này xử lý các đường dẫn như /bookings/create/
     path('bookings/', include('bookings.urls')),
 
-    # 3. App Frontend (Giao diện chính - Để cuối cùng để bắt đường dẫn gốc '')
+    # 4. App Frontend (Giao diện chính - HTML/Sass)
+    # Để đường dẫn gốc '' ở đây để xử lý Trang chủ, Đăng nhập, Đăng ký
     path('', include('frontend.urls')),
 ]
 
+# Cấu hình để hiển thị ảnh từ thư mục MEDIA trong môi trường phát triển (DEBUG=True)
+# Rất quan trọng để hiển thị ảnh phương tiện và ảnh GPLX người dùng đã upload
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Hỗ trợ thêm static nếu cần (tùy chọn)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
