@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+     path('', include('vehicles.urls')),  # API endpoints cho vehicles
 
     # App routes
     path("bookings/", include("bookings.urls")),
@@ -30,4 +31,5 @@ urlpatterns = [
 # Serve media when DEBUG=True (dev only)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
