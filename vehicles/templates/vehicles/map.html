@@ -40,6 +40,404 @@
       </div>
     </div>
 
+    <div id="termsModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 700px">
+        <div class="modal-header" style="background: #2c3e50; color: white">
+          <h3 style="margin: 0">📜 ĐIỀU KHOẢN & CHÍNH SÁCH THUÊ XE</h3>
+          <span
+            class="close-btn"
+            onclick="closeTermsModal()"
+            style="color: white"
+            >&times;</span
+          >
+        </div>
+
+        <div
+          class="modal-body"
+          style="
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 50vh;
+            overflow-y: auto;
+          "
+        >
+          <div
+            style="
+              background: #e8f5e9;
+              padding: 15px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+              border-left: 5px solid #28a745;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <span style="display: block; font-size: 12px; color: #666"
+                >Đang xem chính sách cho xe:</span
+              >
+              <h3
+                style="margin: 0; color: #28a745; font-size: 20px"
+                id="term-car-name"
+              >
+                Tên xe...
+              </h3>
+            </div>
+            <div style="text-align: right">
+              <span style="display: block; font-size: 12px; color: #666"
+                >Đơn giá tiêu chuẩn:</span
+              >
+              <strong
+                style="font-size: 20px; color: #d63031"
+                id="term-car-price"
+                >0đ/ngày</strong
+              >
+            </div>
+          </div>
+
+          <div class="policy-content">
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+              "
+            >
+              1. GIÁ THUÊ
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>Giá thuê theo từng loại xe (xem bảng giá chi tiết trên).</li>
+              <li>Tính theo ngày (24 giờ kể từ khi nhận xe).</li>
+              <li>
+                <strong>Trả xe trễ:</strong>
+                <ul style="margin-top: 5px">
+                  <li>Dưới 1 giờ: Miễn phí</li>
+                  <li>Từ 1-3 giờ: +200.000đ</li>
+                  <li>Trên 3 giờ: Tính thêm 1 ngày thuê</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              2. NHIÊN LIỆU
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>Khách tự túc chi phí xăng/điện.</li>
+              <li><strong>Giao xe:</strong> Đầy bình/Pin đầy.</li>
+              <li>
+                <strong>Trả xe:</strong> Đầy bình/Pin đầy (hoặc bồi hoàn chi phí
+                nhiên liệu thiếu theo giá thị trường).
+              </li>
+            </ul>
+
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              3. QUÃNG ĐƯỜNG
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>Không giới hạn trong lãnh thổ Việt Nam.</li>
+              <li>
+                Đi ngoài tỉnh/thành phố nơi nhận xe:
+                <strong>Vui lòng báo trước</strong>.
+              </li>
+              <li>❌ <strong>Không cho phép</strong> đưa xe ra nước ngoài.</li>
+            </ul>
+
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              4. TIỀN CỌC & GIẤY TỜ
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>
+                <strong>Tiền cọc (Hoặc giữ CMND/CCCD gốc + Hộ khẩu):</strong>
+                <ul style="margin-top: 5px">
+                  <li>Xe số tự động/xe cao cấp: 15.000.000đ - 30.000.000đ</li>
+                  <li>Xe số sàn/xe phổ thông: 10.000.000đ - 15.000.000đ</li>
+                  <li>Xe máy: 3.000.000đ - 5.000.000đ</li>
+                </ul>
+              </li>
+              <li>
+                <strong>Giấy tờ bắt buộc:</strong>
+                <ul style="margin-top: 5px">
+                  <li>CMND/CCCD (bản gốc).</li>
+                  <li>GPLX hợp lệ (A1/A2 cho xe máy, B1/B2 cho ô tô).</li>
+                  <li>Sổ hộ khẩu hoặc giấy tờ thay thế.</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              5. ĐIỀU KIỆN THUÊ XE
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>
+                <strong>Độ tuổi:</strong> Từ 18 tuổi (xe máy), từ 23 tuổi (ô
+                tô).
+              </li>
+              <li>
+                <strong>Kinh nghiệm lái:</strong> GPLX có thâm niên tối thiểu 2
+                năm (ô tô), 1 năm (xe máy).
+              </li>
+              <li>
+                Không có tiền án tiền sự liên quan đến ma túy, trộm cắp phương
+                tiện.
+              </li>
+            </ul>
+
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              6. BẢO HIỂM & TRÁCH NHIỆM
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>
+                Xe có bảo hiểm TNDS bắt buộc. (Ô tô có thêm BH Vật chất nếu ghi
+                rõ).
+              </li>
+              <li>
+                <strong>Trách nhiệm khi có sự cố:</strong>
+                <ul style="margin-top: 5px">
+                  <li>
+                    Tai nạn nhỏ (xước, móp): Khách bồi thường chi phí sửa chữa
+                    thực tế.
+                  </li>
+                  <li>Tai nạn lớn: Khách chịu mức miễn thường 3tr - 5tr/vụ.</li>
+                  <li>
+                    Mất xe/cháy hoàn toàn: Khách bồi thường 100% giá trị xe (trừ
+                    phần bảo hiểm chi trả).
+                  </li>
+                </ul>
+              </li>
+              <li>
+                ⚠️ Khách phải báo ngay cho chủ xe và công an khi xảy ra sự cố.
+              </li>
+            </ul>
+
+            <h5
+              style="
+                color: #dc3545;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              7. CẤM NGHIÊM 🚫
+            </h5>
+            <ul style="padding-left: 20px; color: #dc3545">
+              <li>
+                ❌ Sử dụng xe vào mục đích phi pháp (vận chuyển hàng cấm, ma
+                túy, trộm cắp...).
+              </li>
+              <li>❌ Cho thuê lại, cầm cố, thế chấp xe.</li>
+              <li>
+                ❌ Lái xe khi không có GPLX, say rượu bia, sử dụng ma túy.
+              </li>
+              <li>❌ Tự ý sửa chữa, thay đổi kết cấu xe.</li>
+              <li>❌ Tham gia đua xe, off-road (trừ xe chuyên dụng).</li>
+              <li>
+                <strong
+                  >Vi phạm = Tịch thu cọc + Bồi thường + Xử lý pháp lý.</strong
+                >
+              </li>
+            </ul>
+
+            <h5
+              style="
+                color: #007bff;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 5px;
+                margin-top: 20px;
+              "
+            >
+              8. CÁC ĐIỀU KHOẢN KHÁC
+            </h5>
+            <ul style="padding-left: 20px">
+              <li>
+                <strong>Phạt nguội:</strong> Khách chịu 100% phí + phí thuê xe
+                kéo dài nếu xe bị giam.
+              </li>
+              <li>
+                <strong>Vệ sinh:</strong> Trả xe sạch sẽ. Xe quá bẩn thu phí
+                100k - 500k.
+              </li>
+              <li>
+                <strong>Hủy lịch:</strong>
+                <ul>
+                  <li>Trước 24h: Hoàn 100% cọc.</li>
+                  <li>12-24h: Hoàn 50%.</li>
+                  <li>Dưới 12h: Không hoàn tiền.</li>
+                </ul>
+              </li>
+            </ul>
+
+            <div
+              style="
+                background: #f8f9fa;
+                padding: 15px;
+                margin-top: 30px;
+                border-radius: 8px;
+                text-align: center;
+              "
+            >
+              <strong>LƯU Ý:</strong> Đọc kỹ điều khoản trước khi thuê. Giữ gìn
+              xe như xe của mình.<br />
+              <div style="margin-top: 10px; font-size: 16px">
+                📞 Hotline hỗ trợ 24/7: <strong>0909.xxx.xxx</strong><br />
+                ✉️ Email: <strong>hotro@thuexeits.vn</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            class="btn-cancel"
+            onclick="closeTermsModal()"
+            style="background: #2c3e50; color: white"
+          >
+            Đã hiểu & Đồng ý
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="locationModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 450px">
+        <div class="modal-header" style="background: #17a2b8; color: white">
+          <h3 style="margin: 0">📍 Thông tin địa điểm</h3>
+          <span
+            class="close-btn"
+            onclick="closeLocationModal()"
+            style="color: white"
+            >&times;</span
+          >
+        </div>
+
+        <div
+          class="modal-body"
+          style="font-family: &quot;Segoe UI&quot;, sans-serif; padding: 20px"
+        >
+          <h4
+            id="loc-car-name"
+            style="
+              margin-top: 0;
+              color: #17a2b8;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 10px;
+            "
+          >
+            Tên xe...
+          </h4>
+
+          <div style="margin-top: 15px">
+            <p style="margin-bottom: 10px">
+              <strong>🏠 Địa chỉ lấy xe:</strong><br />
+              <span
+                style="
+                  color: #555;
+                  display: block;
+                  margin-top: 5px;
+                  background: #f8f9fa;
+                  padding: 8px;
+                  border-radius: 4px;
+                  border-left: 3px solid #17a2b8;
+                "
+              >
+                123 Nguyễn Văn Linh, P. Tân Phú, Q.7, TP.HCM
+              </span>
+            </p>
+
+            <p style="margin-bottom: 10px">
+              <strong>🕐 Giờ mở cửa:</strong>
+              <span style="font-weight: 600">7:00 - 22:00</span>
+            </p>
+
+            <div
+              style="
+                background: #e8f5e9;
+                padding: 12px;
+                border-radius: 6px;
+                margin: 15px 0;
+              "
+            >
+              <strong style="color: #2e7d32">🚗 Hỗ trợ:</strong>
+              <ul style="margin: 5px 0 0 0; padding-left: 20px; color: #333">
+                <li>✓ Giao xe tận nơi (30.000đ/km)</li>
+                <li>✓ Miễn phí trong bán kính 5km</li>
+              </ul>
+            </div>
+
+            <p style="font-size: 15px">
+              <strong>📞 Liên hệ chủ xe:</strong>
+              <a
+                href="tel:0901234567"
+                style="
+                  color: #d63031;
+                  font-weight: bold;
+                  text-decoration: none;
+                  font-size: 18px;
+                  margin-left: 5px;
+                "
+                >090 123 4567</a
+              >
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="modal-footer"
+          style="display: flex; gap: 10px; justify-content: flex-end"
+        >
+          <button
+            id="btn-view-map"
+            class="btn-cancel"
+            style="background: #6c757d; color: white; margin: 0; flex: 1"
+          >
+            🔍 Xem bản đồ
+          </button>
+          <button
+            id="btn-start-route"
+            class="btn-confirm"
+            style="background: #17a2b8; color: white; flex: 1"
+          >
+            ↗️ Chỉ đường
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
