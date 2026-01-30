@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Vehicle Rental{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: var(--spacing-xl);
+        margin: var(--spacing-xl) 0;
+        min-height: 80vh;
+    }
+    
+    .admin-sidebar {
+        background: #fff;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .admin-sidebar-title {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-lg);
+        color: var(--gray-900);
+    }
+    
+    .admin-menu {
+        list-style: none;
+    }
+    
+    .admin-menu-item {
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .admin-menu-link {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        color: var(--gray-700);
+        transition: all var(--transition-fast);
+        font-weight: 500;
+    }
+    
+    .admin-menu-link:hover,
+    .admin-menu-link.active {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary);
+    }
+    
+    .admin-content {
+        background: #fff;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .admin-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-2xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-200);
+    }
+    
+    .admin-title {
+        font-size: 2rem;
+        color: var(--gray-900);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        color: #fff;
+    }
+    
+    .stat-card.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .stat-card.danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .stat-label {
+        font-size: 0.938rem;
+        opacity: 0.9;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        margin-top: var(--spacing-xl);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        background: var(--gray-50);
+    }
+    
+    th {
+        text-align: left;
+        padding: var(--spacing-md);
+        font-weight: 700;
+        color: var(--gray-700);
+        border-bottom: 2px solid var(--gray-200);
+    }
+    
+    td {
+        padding: var(--spacing-md);
+        border-bottom: 1px solid var(--gray-200);
+        color: var(--gray-700);
+    }
+    
+    tr:hover {
+        background: var(--gray-50);
+    }
+    
+    .table-img {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-lg);
+    }
+    
+    .modal.active {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: #fff;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: fadeInUp 0.3s ease-out;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-200);
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        color: var(--gray-900);
+    }
+    
+    .modal-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--gray-100);
+        color: var(--gray-600);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+    
+    .modal-close:hover {
+        background: var(--gray-200);
+        color: var(--gray-900);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    @media (max-width: 1024px) {
+        .admin-layout {
+            grid-template-columns: 1fr;
+        }
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <h3 class="admin-sidebar-title">
+                <i class="fas fa-dashboard"></i>
+                Admin Panel
+            </h3>
+            <ul class="admin-menu">
+                <li class="admin-menu-item">
+                    <a href="#" class="admin-menu-link active" onclick="showTab('overview')">
+                        <i class="fas fa-chart-line"></i>
+                        Tổng quan
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="#" class="admin-menu-link" onclick="showTab('vehicles')">
+                        <i class="fas fa-car"></i>
+                        Quản lý xe
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="#" class="admin-menu-link" onclick="showTab('bookings')">
+                        <i class="fas fa-list"></i>
+                        Quản lý đơn hàng
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="#" class="admin-menu-link" onclick="showTab('users')">
+                        <i class="fas fa-users"></i>
+                        Người dùng
+                    </a>
+                </li>
+                <li class="admin-menu-item">
+                    <a href="{% url 'home' %}" class="admin-menu-link">
+                        <i class="fas fa-home"></i>
+                        Về trang chủ
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="admin-content">
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content">
+                <div class="admin-header">
+                    <h1 class="admin-title">Tổng quan hệ thống</h1>
+                </div>
+                
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="stat-value">{{ total_vehicles }}</div>
+                        <div class="stat-label">Tổng số xe</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value">{{ available_vehicles }}</div>
+                        <div class="stat-label">Xe sẵn sàng</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="stat-value">{{ total_bookings }}</div>
+                        <div class="stat-label">Đơn đặt xe</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-value">{{ total_revenue }}M</div>
+                        <div class="stat-label">Doanh thu (VNĐ)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vehicles Tab -->
+            <div id="vehicles-tab" class="tab-content" style="display:none;">
+                <div class="admin-header">
+                    <h1 class="admin-title">Quản lý xe</h1>
+                    <button class="btn btn-primary" onclick="openModal('vehicleModal')">
+                        <i class="fas fa-plus"></i>
+                        Thêm xe mới
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Tên xe</th>
+                                <th>Loại</th>
+                                <th>Giá/ngày</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vehicle in vehicles %}
+                            <tr>
+                                <td><img src="{{ vehicle.image.url }}" class="table-img"></td>
+                                <td><strong>{{ vehicle.name }}</strong></td>
+                                <td>{{ vehicle.vehicle_type }}</td>
+                                <td><strong>{{ vehicle.price_per_day }}k</strong> VNĐ</td>
+                                <td>
+                                    <span class="badge badge-{{ vehicle.status }}">
+                                        {{ vehicle.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="editVehicle({{ vehicle.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteVehicle({{ vehicle.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Bookings Tab -->
+            <div id="bookings-tab" class="tab-content" style="display:none;">
+                <div class="admin-header">
+                    <h1 class="admin-title">Quản lý đơn hàng</h1>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Xe</th>
+                                <th>Thời gian</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td><strong>#{{ booking.id }}</strong></td>
+                                <td>{{ booking.user.username }}</td>
+                                <td>{{ booking.vehicle.name }}</td>
+                                <td>{{ booking.start_date|date:"d/m/Y" }} - {{ booking.end_date|date:"d/m/Y" }}</td>
+                                <td><strong>{{ booking.total_price|floatformat:0 }}k</strong> VNĐ</td>
+                                <td>
+                                    <span class="badge badge-{{ booking.status }}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        {% if booking.status == 'pending' %}
+                                        <button class="btn btn-sm btn-success" onclick="approveBooking({{ booking.id }})">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-danger" onclick="cancelBooking({{ booking.id }})">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Vehicle Modal -->
+<div class="modal" id="vehicleModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Thêm xe mới</h2>
+            <button class="modal-close" onclick="closeModal('vehicleModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label required">Tên xe</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label required">Loại xe</label>
+                    <select name="vehicle_type" class="form-control" required>
+                        <option value="car">Ô tô</option>
+                        <option value="motorcycle">Xe máy</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label required">Giá thuê/ngày (VNĐ)</label>
+                    <input type="number" name="price_per_day" class="form-control" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Số chỗ</label>
+                    <input type="number" name="seats" class="form-control" value="4">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Truyền động</label>
+                    <select name="transmission" class="form-control">
+                        <option value="Tự động">Tự động</option>
+                        <option value="Số sàn">Số sàn</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Hình ảnh</label>
+                <input type="file" name="image" class="form-control" accept="image/*">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Mô tả</label>
+                <textarea name="description" class="form-control" rows="4"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg w-full">
+                <i class="fas fa-save"></i>
+                Lưu xe
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+        document.querySelectorAll('.admin-menu-link').forEach(link => link.classList.remove('active'));
+        document.getElementById(tabName + '-tab').style.display = 'block';
+        event.target.classList.add('active');
+    }
+    
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+    
+    function editVehicle(id) {
+        alert('Chỉnh sửa xe #' + id);
+    }
+    
+    function deleteVehicle(id) {
+        if (confirm('Bạn có chắc muốn xóa xe này?')) {
+            // Call delete API
+            alert('Đã xóa xe #' + id);
+        }
+    }
+    
+    function approveBooking(id) {
+        if (confirm('Xác nhận duyệt đơn hàng #' + id + '?')) {
+            // Call approve API
+            alert('Đã duyệt đơn hàng #' + id);
+        }
+    }
+    
+    function cancelBooking(id) {
+        if (confirm('Hủy đơn hàng #' + id + '?')) {
+            // Call cancel API
+            alert('Đã hủy đơn hàng #' + id);
+        }
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+        }
+    }
+</script>
+{% endblock %}

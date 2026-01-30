@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Bản đồ - Phương tiện gần tôi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .map-container {
+        height: calc(100vh - 100px);
+        background: #fff;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        margin: var(--spacing-xl) 0;
+        position: relative;
+    }
+    
+    #map {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .map-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #E0E7FF 0%, #DBEAFE 100%);
+    }
+    
+    .map-placeholder-icon {
+        width: 120px;
+        height: 120px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 3rem;
+        margin-bottom: var(--spacing-xl);
+        box-shadow: var(--shadow-2xl);
+    }
+    
+    .map-placeholder-title {
+        font-size: 2rem;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .map-placeholder-text {
+        font-size: 1.125rem;
+        color: var(--gray-700);
+        max-width: 600px;
+        text-align: center;
+        line-height: 1.6;
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .map-legend {
+        position: absolute;
+        top: var(--spacing-lg);
+        right: var(--spacing-lg);
+        background: #fff;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+    }
+    
+    .legend-title {
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+        color: var(--gray-900);
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin: var(--spacing-sm) 0;
+        font-size: 0.875rem;
+    }
+    
+    .legend-marker {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+    
+    .legend-marker.available {
+        background: var(--status-available);
+    }
+    
+    .legend-marker.booked {
+        background: var(--status-booked);
+    }
+    
+    .legend-marker.in-use {
+        background: var(--status-in-use);
+    }
+</style>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="map-container">
+        <!-- Map placeholder - Hiếu sẽ implement Leaflet map ở đây -->
+        <div id="map" class="map-placeholder">
+            <div class="map-placeholder-icon">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <h2 class="map-placeholder-title">Bản đồ phương tiện</h2>
+            <p class="map-placeholder-text">
+                Module ITS - Bản đồ hiển thị vị trí các phương tiện sẽ được implement bởi Hiếu 
+                (phần map) sử dụng Leaflet.js. Tính năng này sẽ hiển thị vị trí xe trên bản đồ 
+                thời gian thực với markers tùy theo trạng thái xe.
+            </p>
+            <div style="display: flex; gap: var(--spacing-md);">
+                <a href="{% url 'vehicle_list' %}" class="btn btn-primary">
+                    <i class="fas fa-list"></i>
+                    Xem danh sách xe
+                </a>
+                <a href="{% url 'home' %}" class="btn btn-outline">
+                    <i class="fas fa-home"></i>
+                    Về trang chủ
+                </a>
+            </div>
+        </div>
+        
+        <!-- Map Legend -->
+        <div class="map-legend">
+            <div class="legend-title">Chú thích</div>
+            <div class="legend-item">
+                <div class="legend-marker available"></div>
+                <span>Xe sẵn sàng</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-marker booked"></div>
+                <span>Đã đặt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-marker in-use"></div>
+                <span>Đang thuê</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // TODO: Hiếu sẽ implement Leaflet map ở đây
+    // Example code structure:
+    
+    /*
+    // Initialize map
+    const map = L.map('map').setView([10.762622, 106.660172], 13);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Add markers for vehicles
+    const vehicles = {{ vehicles_json|safe }};
+    vehicles.forEach(vehicle => {
+        const marker = L.marker([vehicle.lat, vehicle.lng]).addTo(map);
+        marker.bindPopup(`
+            <strong>${vehicle.name}</strong><br>
+            Giá: ${vehicle.price}/ngày<br>
+            Trạng thái: ${vehicle.status}
+        `);
+    });
+    */
+    
+    console.log('Map module ready for implementation by Hiếu');
+</script>
+{% endblock %}

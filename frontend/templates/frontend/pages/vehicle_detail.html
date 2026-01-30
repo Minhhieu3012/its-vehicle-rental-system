@@ -1,107 +1,439 @@
-﻿{% extends "frontend/base.html" %}
-{% load static %}
+﻿{% extends 'base.html' %}
+
+{% block title %}{{ vehicle.name }} - Vehicle Rental{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-breadcrumb {
+        padding: var(--spacing-lg) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: 0.938rem;
+        color: var(--gray-600);
+    }
+    
+    .page-breadcrumb a {
+        color: var(--primary);
+    }
+    
+    .vehicle-detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: var(--spacing-2xl);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .vehicle-gallery {
+        background: #fff;
+        border-radius: var(--radius-2xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .gallery-main {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+    }
+    
+    .gallery-thumbs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-sm);
+        padding: var(--spacing-lg);
+        background: var(--gray-50);
+    }
+    
+    .gallery-thumb {
+        height: 100px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all var(--transition-fast);
+        border: 2px solid transparent;
+    }
+    
+    .gallery-thumb:hover,
+    .gallery-thumb.active {
+        opacity: 1;
+        border-color: var(--primary);
+    }
+    
+    .vehicle-info {
+        background: #fff;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        margin: var(--spacing-xl) 0;
+    }
+    
+    .vehicle-header {
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .vehicle-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .vehicle-badge.available {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+    
+    .vehicle-name {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .vehicle-location {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        color: var(--gray-600);
+        font-size: 0.938rem;
+    }
+    
+    .vehicle-specs-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-lg);
+        padding: var(--spacing-xl) 0;
+        border-top: 1px solid var(--gray-200);
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .spec-item {
+        text-align: center;
+    }
+    
+    .spec-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(37, 99, 235, 0.1);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.5rem;
+        margin: 0 auto var(--spacing-sm);
+    }
+    
+    .spec-label {
+        font-size: 0.813rem;
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .spec-value {
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+    
+    .vehicle-description {
+        padding: var(--spacing-xl) 0;
+    }
+    
+    .vehicle-description h3 {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .vehicle-description p {
+        color: var(--gray-700);
+        line-height: 1.8;
+    }
+    
+    .booking-card {
+        background: #fff;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        padding: var(--spacing-xl);
+        position: sticky;
+        top: 100px;
+    }
+    
+    .booking-price {
+        text-align: center;
+        padding-bottom: var(--spacing-xl);
+        border-bottom: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .booking-price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .booking-price-unit {
+        font-size: 1rem;
+        color: var(--gray-600);
+    }
+    
+    .booking-summary {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin: var(--spacing-lg) 0;
+    }
+    
+    .booking-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--spacing-sm) 0;
+    }
+    
+    .booking-summary-row.total {
+        border-top: 2px solid var(--gray-200);
+        padding-top: var(--spacing-md);
+        margin-top: var(--spacing-sm);
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+    
+    .booking-note {
+        background: rgba(37, 99, 235, 0.05);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        margin-top: var(--spacing-lg);
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+    
+    @media (max-width: 1024px) {
+        .vehicle-detail-layout {
+            grid-template-columns: 1fr;
+        }
+        .booking-card {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container detail-container">
-    <div class="detail-grid">
-        <div class="image-section">
-            {% if vehicle.image %}
-            <img src="{{ vehicle.image.url }}" alt="{{ vehicle.name }}">
-            {% else %}
-            <img src="{% static 'frontend/images/default-car.png' %}" alt="Default Car">
-            {% endif %}
-        </div>
-
-        <div class="info-section">
-            <h1>{{ vehicle.name }}</h1>
-            <p class="plate">Biển số: {{ vehicle.license_plate }}</p>
-            <p class="price">Giá thuê: <strong>{{ vehicle.price_per_day|floatformat:0 }} VNĐ / ngày</strong></p>
-
-            <div class="description">
-                <h4>Mô tả xe:</h4>
-                <p>{{ vehicle.description|default:"Chưa có mô tả chi tiết cho xe này." }}</p>
+<div class="container">
+    <!-- Breadcrumb -->
+    <div class="page-breadcrumb">
+        <a href="{% url 'home' %}">Trang chủ</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="{% url 'vehicle_list' %}">Danh sách xe</a>
+        <i class="fas fa-chevron-right"></i>
+        <span>{{ vehicle.name }}</span>
+    </div>
+    
+    <div class="vehicle-detail-layout">
+        <!-- Left Column -->
+        <div>
+            <!-- Gallery -->
+            <div class="vehicle-gallery">
+                <img 
+                    src="{{ vehicle.image.url }}" 
+                    alt="{{ vehicle.name }}"
+                    class="gallery-main"
+                    id="mainImage"
+                >
+                <div class="gallery-thumbs">
+                    <img src="{{ vehicle.image.url }}" alt="Thumb 1" class="gallery-thumb active" onclick="changeImage(this)">
+                    <img src="{{ vehicle.image.url }}" alt="Thumb 2" class="gallery-thumb" onclick="changeImage(this)">
+                    <img src="{{ vehicle.image.url }}" alt="Thumb 3" class="gallery-thumb" onclick="changeImage(this)">
+                    <img src="{{ vehicle.image.url }}" alt="Thumb 4" class="gallery-thumb" onclick="changeImage(this)">
+                </div>
             </div>
-
-            <hr>
-
-            <form action="{% url 'frontend:create_booking' vehicle.id %}" method="POST" class="booking-form">
-                {% csrf_token %}
-                <div class="date-inputs">
-                    <div class="form-group">
-                        <label>Ngày nhận xe:</label>
-                        <input type="date" name="start_date" required class="form-control">
+            
+            <!-- Vehicle Info -->
+            <div class="vehicle-info">
+                <div class="vehicle-header">
+                    <div class="vehicle-badge {{ vehicle.status }}">
+                        {% if vehicle.status == 'available' %}Có sẵn
+                        {% elif vehicle.status == 'booked' %}Đã đặt
+                        {% else %}Bảo trì{% endif %}
                     </div>
-                    <div class="form-group">
-                        <label>Ngày trả xe:</label>
-                        <input type="date" name="end_date" required class="form-control">
+                    <h1 class="vehicle-name">{{ vehicle.name }}</h1>
+                    <div class="vehicle-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Quận 1, TP. Hồ Chí Minh</span>
                     </div>
                 </div>
-
-                <button type="submit" class="btn-book"
-                        {% if vehicle.status !='available' %} disabled {% endif %}>
-                    {% if vehicle.status == 'available' %}
-                    Xác nhận đặt xe
+                
+                <!-- Specs Grid -->
+                <div class="vehicle-specs-grid">
+                    <div class="spec-item">
+                        <div class="spec-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="spec-label">Truyền động</div>
+                        <div class="spec-value">{{ vehicle.transmission }}</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="spec-label">Số chỗ</div>
+                        <div class="spec-value">{{ vehicle.seats }} chỗ</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-icon">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                        <div class="spec-label">Nhiên liệu</div>
+                        <div class="spec-value">{{ vehicle.fuel_type }}</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="spec-label">Đánh giá</div>
+                        <div class="spec-value">{{ vehicle.rating }}/5.0</div>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="vehicle-description">
+                    <h3>Mô tả chi tiết</h3>
+                    <p>
+                        {{ vehicle.description|default:"Toyota Camry 2023 Hybrid là sự kết hợp hoàn hảo giữa thiết kế sang trọng và công nghệ tiết kiệm nhiên liệu vượt trội. Phù hợp cho các chuyến công tác, di chuyển trong thành phố hoặc du lịch gia đình. Xe được trang bị hệ thống an toàn Toyota Safety Sense 2.5+, cửa sổ trời, và hệ thống âm thanh JBL cao cấp." }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Booking Card -->
+        <div>
+            <div class="booking-card">
+                <div class="booking-price">
+                    <div class="booking-price-amount">
+                        {{ vehicle.price_per_day|floatformat:0 }}k
+                    </div>
+                    <div class="booking-price-unit">VNĐ / ngày</div>
+                </div>
+                
+                <form method="post" action="{% url 'create_booking' vehicle.id %}" id="bookingForm">
+                    {% csrf_token %}
+                    
+                    <!-- Pickup Date -->
+                    <div class="form-group">
+                        <label class="form-label required">Ngày nhận xe</label>
+                        <input 
+                            type="datetime-local" 
+                            name="start_date" 
+                            class="form-control"
+                            id="startDate"
+                            required
+                        >
+                    </div>
+                    
+                    <!-- Return Date -->
+                    <div class="form-group">
+                        <label class="form-label required">Ngày trả xe</label>
+                        <input 
+                            type="datetime-local" 
+                            name="end_date" 
+                            class="form-control"
+                            id="endDate"
+                            required
+                        >
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label class="form-label required">Điểm nhận/trả xe</label>
+                        <select name="location" class="form-control" required>
+                            <option value="">Tại văn phòng (Quận 1)</option>
+                            <option value="airport">Sân bay Tân Sơn Nhất (+50k)</option>
+                            <option value="district3">Quận 3 (+30k)</option>
+                            <option value="district7">Quận 7 (+30k)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Summary -->
+                    <div class="booking-summary">
+                        <div class="booking-summary-row">
+                            <span>Giá thuê (3 ngày)</span>
+                            <span id="rentalCost">3,600,000đ</span>
+                        </div>
+                        <div class="booking-summary-row">
+                            <span>Phí cuối tuần</span>
+                            <span id="weekendFee">+360,000đ</span>
+                        </div>
+                        <div class="booking-summary-row">
+                            <span>Phí bảo hiểm</span>
+                            <span>Miễn phí</span>
+                        </div>
+                        <div class="booking-summary-row total">
+                            <span>Tổng cộng</span>
+                            <span id="totalCost">3,960,000đ</span>
+                        </div>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        <button type="submit" class="btn btn-primary btn-lg w-full">
+                            <i class="fas fa-check-circle"></i>
+                            Đặt xe ngay
+                        </button>
                     {% else %}
-                    Xe hiện không sẵn sàng
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg w-full">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Đăng nhập để đặt xe
+                        </a>
                     {% endif %}
-                </button>
-            </form>
+                </form>
+                
+                <div class="booking-note">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Hủy miễn phí trước 24 giờ. Hỗ trợ 24/7</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<style>
-    .detail-container {
-        padding: 40px 20px;
-        max-width: 1200px;
-        margin: auto;
+<script>
+    function changeImage(thumb) {
+        document.getElementById('mainImage').src = thumb.src;
+        document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
     }
-
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-    }
-
-    .image-section img {
-        width: 100%;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .price {
-        font-size: 24px;
-        color: #28a745;
-        margin: 20px 0;
-    }
-
-    .booking-form {
-        background: #f8f9fa;
-        padding: 25px;
-        border-radius: 8px;
-        border: 1px solid #eee;
-    }
-
-    .date-inputs {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .btn-book {
-        width: 100%;
-        padding: 15px;
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-        .btn-book:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+    
+    // Calculate booking cost
+    const pricePerDay = {{ vehicle.price_per_day }};
+    
+    function updateCost() {
+        const startDate = new Date(document.getElementById('startDate').value);
+        const endDate = new Date(document.getElementById('endDate').value);
+        
+        if (startDate && endDate && endDate > startDate) {
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const rentalCost = pricePerDay * days * 1000;
+            const weekendFee = rentalCost * 0.1; // 10% weekend fee
+            const totalCost = rentalCost + weekendFee;
+            
+            document.getElementById('rentalCost').textContent = rentalCost.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('weekendFee').textContent = '+' + weekendFee.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('totalCost').textContent = totalCost.toLocaleString('vi-VN') + 'đ';
         }
-</style>
+    }
+    
+    document.getElementById('startDate').addEventListener('change', updateCost);
+    document.getElementById('endDate').addEventListener('change', updateCost);
+    
+    // Set min datetime to now
+    const now = new Date();
+    const minDateTime = now.toISOString().slice(0, 16);
+    document.getElementById('startDate').min = minDateTime;
+    document.getElementById('endDate').min = minDateTime;
+</script>
 {% endblock %}

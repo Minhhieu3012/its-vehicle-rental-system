@@ -1,11 +1,9 @@
 from django.db import models
-
-# Ưu tiên dùng User từ app users nếu dự án đã cấu hình, nếu chưa thì đổi thành django.contrib.auth.models
 from users.models import User 
 
-# ==========================================
-# 1. MODEL XE (Lấy từ nhánh DEV - Chuẩn Map ITS)
-# ==========================================
+# ============
+# 1. MODEL XE 
+# ============
 class Vehicle(models.Model):
     STATUS_CHOICES = [
         ('available', 'Available'),       # Xe sẵn sàng
@@ -78,9 +76,9 @@ class Vehicle(models.Model):
 
         return f"{self.name} - {self.license_plate}"
 
-# ==========================================
+# ======================
 # 3. MODEL ẢNH CHI TIẾT 
-# ==========================================
+# ======================
 class VehicleImage(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='vehicle_gallery/', verbose_name="Ảnh chi tiết")

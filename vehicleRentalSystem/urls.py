@@ -18,12 +18,11 @@ urlpatterns = [
     path('bookings/', include('bookings.urls')),
     
     # 4. App Reviews (Đánh giá - Lấy từ nhánh Dev nếu cần endpoint riêng, thường thì include trong vehicles)
-    # Nếu bạn có file reviews/urls.py thì bỏ comment dòng dưới, không thì thôi.
     # path('reviews/', include('reviews.urls')),
 
     # 5. App Frontend (Giao diện chính - Trang chủ, Login, Register)
     # QUAN TRỌNG: Để dòng này ở cuối cùng để nó bắt đường dẫn gốc ''
-    path('', include('frontend.urls')),
+    path('', include(('frontend.urls', 'frontend'), namespace='frontend')),
 ]
 
 # Cấu hình load ảnh (Media) khi chạy Local

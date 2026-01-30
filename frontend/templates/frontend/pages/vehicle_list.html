@@ -1,0 +1,458 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Danh sách xe - Vehicle Rental{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: var(--spacing-2xl) 0;
+        color: #fff;
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .page-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: 0.938rem;
+        margin-bottom: var(--spacing-md);
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .page-breadcrumb a {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .page-breadcrumb a:hover {
+        color: #fff;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .page-subtitle {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .content-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-3xl);
+    }
+    
+    .sidebar {
+        position: sticky;
+        top: 100px;
+        height: fit-content;
+    }
+    
+    .filter-card {
+        background: #fff;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .filter-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-lg);
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+    
+    .filter-title i {
+        color: var(--primary);
+    }
+    
+    .filter-group {
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        font-size: 0.938rem;
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+    
+    .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer;
+    }
+    
+    .filter-option input[type="radio"],
+    .filter-option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .filter-option label {
+        cursor: pointer;
+        color: var(--gray-700);
+        font-size: 0.938rem;
+    }
+    
+    .main-content {
+        min-height: 500px;
+    }
+    
+    .results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-xl);
+        padding: var(--spacing-lg);
+        background: #fff;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .results-count {
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+    
+    .results-count strong {
+        color: var(--primary);
+    }
+    
+    .sort-select {
+        min-width: 200px;
+    }
+    
+    .vehicle-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-lg);
+    }
+    
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-2xl);
+    }
+    
+    .pagination-item {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-md);
+        background: #fff;
+        color: var(--gray-700);
+        font-weight: 600;
+        transition: all var(--transition-fast);
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    
+    .pagination-item:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+    
+    .pagination-item.active {
+        background: var(--primary);
+        color: #fff;
+    }
+    
+    .pagination-item.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: var(--spacing-3xl);
+        background: #fff;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .no-results i {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .no-results h3 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+        color: var(--gray-700);
+    }
+    
+    .no-results p {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    @media (max-width: 1024px) {
+        .content-layout {
+            grid-template-columns: 240px 1fr;
+        }
+        .vehicle-list {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .content-layout {
+            grid-template-columns: 1fr;
+        }
+        .sidebar {
+            position: static;
+        }
+        .vehicle-list {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="page-breadcrumb">
+            <a href="{% url 'home' %}">Trang chủ</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Danh sách xe</span>
+        </div>
+        <h1 class="page-title">Danh sách xe</h1>
+        <p class="page-subtitle">Tìm thấy {{ total_vehicles }} xe phù hợp</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content-layout">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <form method="get" id="filterForm">
+                <!-- Vehicle Type Filter -->
+                <div class="filter-card">
+                    <h3 class="filter-title">
+                        <i class="fas fa-filter"></i>
+                        Bộ lọc tìm kiếm
+                    </h3>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Loại xe</label>
+                        <div class="filter-options">
+                            <label class="filter-option">
+                                <input type="radio" name="type" value="" {% if not request.GET.type %}checked{% endif %}>
+                                <span>Tất cả</span>
+                            </label>
+                            <label class="filter-option">
+                                <input type="radio" name="type" value="car" {% if request.GET.type == 'car' %}checked{% endif %}>
+                                <span>Ô tô</span>
+                            </label>
+                            <label class="filter-option">
+                                <input type="radio" name="type" value="motorcycle" {% if request.GET.type == 'motorcycle' %}checked{% endif %}>
+                                <span>Xe máy</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Trạng thái</label>
+                        <div class="filter-options">
+                            <label class="filter-option">
+                                <input type="checkbox" name="status" value="available" {% if 'available' in request.GET.getlist.status %}checked{% endif %}>
+                                <span>Sẵn sàng</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-search"></i>
+                        Áp dụng bộ lọc
+                    </button>
+                </div>
+            </form>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Results Header -->
+            <div class="results-header">
+                <div class="results-count">
+                    Tìm thấy <strong>{{ vehicles|length }}</strong> xe
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <label style="font-weight: 600; color: var(--gray-700); white-space: nowrap;">
+                        Sắp xếp:
+                    </label>
+                    <select name="sort" class="form-control sort-select" onchange="this.form.submit()">
+                        <option value="">Mặc định</option>
+                        <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>
+                            Giá tăng dần
+                        </option>
+                        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>
+                            Giá giảm dần
+                        </option>
+                        <option value="rating" {% if request.GET.sort == 'rating' %}selected{% endif %}>
+                            Đánh giá cao nhất
+                        </option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Vehicle Grid -->
+            {% if vehicles %}
+            <div class="vehicle-list">
+                {% for vehicle in vehicles %}
+                <div class="card vehicle-card">
+                    <div class="vehicle-card-badge {{ vehicle.status }}">
+                        {% if vehicle.status == 'available' %}Sẵn sàng
+                        {% elif vehicle.status == 'booked' %}Đã đặt
+                        {% elif vehicle.status == 'in-use' %}Đang thuê
+                        {% else %}Bảo trì{% endif %}
+                    </div>
+                    
+                    <img 
+                        src="{{ vehicle.image.url }}" 
+                        alt="{{ vehicle.name }}" 
+                        class="card-image"
+                    >
+                    
+                    <div class="card-body">
+                        <h3 class="card-title">{{ vehicle.name }}</h3>
+                        
+                        <div class="vehicle-card-specs">
+                            <div class="vehicle-card-spec">
+                                <i class="fas fa-cog"></i>
+                                <span>{{ vehicle.transmission }}</span>
+                            </div>
+                            <div class="vehicle-card-spec">
+                                <i class="fas fa-users"></i>
+                                <span>{{ vehicle.seats }} chỗ</span>
+                            </div>
+                            <div class="vehicle-card-spec">
+                                <i class="fas fa-gas-pump"></i>
+                                <span>{{ vehicle.fuel_type }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="vehicle-card-rating">
+                            <div class="vehicle-card-rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= vehicle.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="vehicle-card-rating-count">
+                                {{ vehicle.rating }} ({{ vehicle.review_count }} đánh giá)
+                            </span>
+                        </div>
+                        
+                        <div class="vehicle-card-price">
+                            <span class="vehicle-card-price-amount">
+                                {{ vehicle.price_per_day|floatformat:0 }}k
+                            </span>
+                            <span class="vehicle-card-price-unit">/ngày</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <a href="{% url 'vehicle_detail' vehicle.id %}" class="btn btn-primary w-full">
+                            <i class="fas fa-arrow-right"></i>
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="?page={{ page|add:-1 }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-item">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% else %}
+                <div class="pagination-item disabled">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                {% endif %}
+                
+                {% for i in page_range %}
+                <a href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   class="pagination-item {% if i == page %}active{% endif %}">
+                    {{ i }}
+                </a>
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <a href="?page={{ page|add:1 }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-item">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% else %}
+                <div class="pagination-item disabled">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- No Results -->
+            <div class="no-results">
+                <i class="fas fa-car"></i>
+                <h3>Không tìm thấy xe phù hợp</h3>
+                <p>Vui lòng thử điều chỉnh bộ lọc hoặc tìm kiếm lại</p>
+                <a href="{% url 'vehicle_list' %}" class="btn btn-primary">
+                    <i class="fas fa-redo"></i>
+                    Xóa bộ lọc
+                </a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit form on filter change
+    const filterForm = document.getElementById('filterForm');
+    const filterInputs = filterForm.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            filterForm.submit();
+        });
+    });
+</script>
+{% endblock %}

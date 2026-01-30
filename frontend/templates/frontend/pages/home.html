@@ -1,42 +1,415 @@
-﻿{% extends 'frontend/base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Trang chủ - XeRental{% endblock %}
+{% block title %}Trang chủ - Hệ thống thuê xe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--radius-2xl);
+        margin: var(--spacing-xl) 0;
+        padding: var(--spacing-3xl);
+        position: relative;
+        overflow: hidden;
+        min-height: 450px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url('data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="100%25" height="100%25" fill="url(%23grid)"/%3E%3C/svg%3E');
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        color: #fff;
+        margin-bottom: var(--spacing-md);
+        line-height: 1.1;
+    }
+    
+    .hero-title-highlight {
+        color: #10B981;
+        display: block;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: var(--spacing-2xl);
+        line-height: 1.6;
+    }
+    
+    .hero-search {
+        background: #fff;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-xl);
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: var(--spacing-md);
+        box-shadow: var(--shadow-2xl);
+    }
+    
+    .hero-search-item {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .hero-search-label {
+        font-size: 0.813rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    
+    .hero-search-label i {
+        color: var(--primary);
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+    
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 40px;
+        background: var(--primary);
+        border-radius: var(--radius-full);
+    }
+    
+    .section-link {
+        color: var(--primary);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        transition: gap var(--transition-fast);
+    }
+    
+    .section-link:hover {
+        gap: var(--spacing-md);
+    }
+    
+    .vehicle-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-lg);
+    }
+    
+    .map-cta {
+        background: linear-gradient(135deg, #E0E7FF 0%, #DBEAFE 100%);
+        border-radius: var(--radius-2xl);
+        padding: var(--spacing-3xl);
+        margin: var(--spacing-3xl) 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-2xl);
+    }
+    
+    .map-cta-content h2 {
+        font-size: 2rem;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .map-cta-content p {
+        font-size: 1.125rem;
+        color: var(--gray-700);
+        margin-bottom: 0;
+    }
+    
+    .rating-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        margin: var(--spacing-3xl) 0;
+    }
+    
+    .rating-header {
+        text-align: center;
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .rating-header h3 {
+        font-size: 1.75rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .rating-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-lg);
+    }
+    
+    .rating-card {
+        background: #fff;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+    }
+    
+    .rating-card-image {
+        width: 120px;
+        height: 120px;
+        border-radius: var(--radius-xl);
+        margin: 0 auto var(--spacing-md);
+        object-fit: cover;
+    }
+    
+    .rating-card-name {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .rating-card-stars {
+        color: #f59e0b; /* Sửa lại biến var(--accent) thành mã màu cụ thể nếu chưa khai báo */
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .rating-card-review {
+        color: var(--gray-600);
+        font-size: 0.938rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .rating-card-rating {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        font-size: 0.813rem;
+        color: var(--gray-600);
+    }
+    
+    @media (max-width: 1024px) {
+        .vehicle-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .rating-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .hero-search {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        .vehicle-grid,
+        .rating-cards {
+            grid-template-columns: 1fr;
+        }
+        .hero-search {
+            grid-template-columns: 1fr;
+        }
+        .map-cta {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="home-hero">
-    <div class="home-hero__banner" style='background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url("{% static "assets/hero-bg.jpg" %}");'>
-        <div class="home-hero__content">
-            <h1 class="home-hero__title">
-                Hành trình của bạn, <br>
-                <span class="highlight">Phương tiện của chúng tôi</span>
+<div class="container">
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Hành trình của bạn,
+                <span class="hero-title-highlight">Phương tiện của chúng tôi</span>
             </h1>
-            <p class="home-hero__description">Khám phá những điểm đến tuyệt vời.</p>
-        </div>
-
-        <div class="home-hero__search">
-            <form class="search-form" method="GET" action="/vehicles/">
-                <div class="search-form__field">
-                    <label>Địa điểm nhận xe</label>
-                    <div class="search-form__input-wrapper">
-                        <span class="material-symbols-outlined">location_on</span>
-                        <select name="location">
-                            <option>TP. Hồ Chí Minh</option>
-                            <option>Hà Nội</option>
-                        </select>
-                    </div>
+            <p class="hero-subtitle">
+                Khám phá những điểm đến tuyệt vời với đội xe đa dạng, 
+                đăng ký dễ dàng và giá cả cạnh tranh nhất.
+            </p>
+            
+            <form action="{% url 'vehicle_list' %}" method="get" class="hero-search">
+                <div class="hero-search-item">
+                    <label class="hero-search-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Địa điểm nhận xe
+                    </label>
+                    <select name="location" class="form-control">
+                        <option value="">TP. Hồ Chí Minh</option>
+                        <option value="q1">Quận 1</option>
+                        <option value="q3">Quận 3</option>
+                        <option value="q5">Quận 5</option>
+                        <option value="q7">Quận 7</option>
+                    </select>
                 </div>
-                <button type="submit" class="btn btn-primary search-form__submit">Tìm kiếm ngay</button>
+                
+                <div class="hero-search-item">
+                    <label class="hero-search-label">
+                        <i class="fas fa-calendar"></i>
+                        Ngày nhận
+                    </label>
+                    <input 
+                        type="date" 
+                        name="start_date" 
+                        class="form-control"
+                        value="{{ today|date:'Y-m-d' }}"
+                        min="{{ today|date:'Y-m-d' }}"
+                    >
+                </div>
+                
+                <div class="hero-search-item">
+                    <label class="hero-search-label">
+                        <i class="fas fa-calendar"></i>
+                        Ngày trả
+                    </label>
+                    <input 
+                        type="date" 
+                        name="end_date" 
+                        class="form-control"
+                        value="{{ next_week|date:'Y-m-d' }}"
+                        min="{{ today|date:'Y-m-d' }}"
+                    >
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search"></i>
+                    Tìm kiếm ngay
+                </button>
             </form>
         </div>
-    </div>
-</section>
+    </section>
+    
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Xe phổ biến nhất</h2>
+            <a href="{% url 'vehicle_list' %}" class="section-link">
+                Xem tất cả
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="vehicle-grid">
+            {% for vehicle in featured_vehicles %} 
+            <div class="card vehicle-card">
+                <div class="vehicle-card-badge {{ vehicle.status }}">
+                    {% if vehicle.status == 'available' %}Sẵn sàng
+                    {% elif vehicle.status == 'booked' %}Đã đặt
+                    {% elif vehicle.status == 'in-use' %}Đang thuê
+                    {% else %}Bảo trì{% endif %}
+                </div>
+                
+                <img 
+                    src="{{ vehicle.image.url }}" 
+                    alt="{{ vehicle.name }}" 
+                    class="card-image"
+                >
+                
+                <div class="card-body">
+                    <h3 class="card-title">{{ vehicle.name }}</h3>
+                    
+                    <div class="vehicle-card-specs">
+                        <div class="vehicle-card-spec">
+                            <i class="fas fa-cog"></i>
+                            <span>{{ vehicle.transmission }}</span>
+                        </div>
+                        <div class="vehicle-card-spec">
+                            <i class="fas fa-users"></i>
+                            <span>{{ vehicle.seats }} chỗ</span>
+                        </div>
+                        <div class="vehicle-card-spec">
+                            <i class="fas fa-gas-pump"></i>
+                            <span>{{ vehicle.fuel_type }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vehicle-card-rating">
+                        <div class="vehicle-card-rating-stars">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                        </div>
+                        <span class="vehicle-card-rating-count">
+                            {{ vehicle.rating|default:"5.0" }} (12 đánh giá)
+                        </span>
+                    </div>
+                    
+                    <div class="vehicle-card-price">
+                        <span class="vehicle-card-price-amount">
+                            {{ vehicle.price_per_day|floatformat:0 }}k
+                        </span>
+                        <span class="vehicle-card-price-unit">/ngày</span>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{% url 'vehicle_detail' vehicle.id %}" class="btn btn-primary w-full">
+                        <i class="fas fa-arrow-right"></i>
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center w-100 p-5">
+                Chưa có xe nào được cập nhật.
+            </p>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <section class="map-cta">
+        <div class="map-cta-content">
+            <h2>Tìm xe quanh bạn trên bản đồ</h2>
+            <p>
+                Sử dụng tính năng bản đồ để tìm các địa điểm thuê xe gần nhất với 
+                vị trí của bạn. Nhanh chóng, tiện lợi và dễ dàng.
+            </p>
+        </div>
+        <a href="/map/" class="btn btn-primary btn-lg">
+            <i class="fas fa-map"></i>
+            Xem trên bản đồ
+        </a>
+    </section>
+</div>
+{% endblock %}
 
-<section class="popular-vehicles">
-    <div class="section-header">
-        <h2 class="section-title">Xe phổ biến nhất</h2>
-    </div>
-    <div class="vehicles-grid">
-    </div>
-</section>
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const nextWeekDate = new Date();
+        nextWeekDate.setDate(new Date().getDate() + 7);
+        const nextWeek = nextWeekDate.toISOString().split('T')[0];
+        
+        const startInput = document.querySelector('input[name="start_date"]');
+        const endInput = document.querySelector('input[name="end_date"]');
+        
+        if(startInput && !startInput.value) startInput.value = today;
+        if(endInput && !endInput.value) endInput.value = nextWeek;
+    });
+</script>
 {% endblock %}

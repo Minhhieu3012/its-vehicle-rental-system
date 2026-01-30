@@ -1,23 +1,22 @@
-// ============================================================
+// ======================
 // KHAI BÁO BIẾN TOÀN CỤC
-// ============================================================
+// ======================
 var map;
 var userMarker;
 var currentRoute = null;
 
-// Khởi tạo null để bắt buộc hệ thống phải tìm GPS thật
 var userLat = null;
 var userLng = null;
 
-// Tọa độ mặc định (TP.HCM) - Dùng để hiển thị khi chưa có GPS để tránh lỗi màn hình trắng
+// Tọa độ mặc định (TP.HCM)
 const DEFAULT_LAT = 10.762622;
 const DEFAULT_LNG = 106.660172;
 
-// ============================================================
+// =================================
 // 1. HÀM KHỞI TẠO BẢN ĐỒ (INIT MAP)
-// ============================================================
+// =================================
 function initMap(vehicleData) {
-  // SỬA LỖI TRẮNG MÀN HÌNH: Dùng tọa độ mặc định thay vì null
+  // Dùng tọa độ mặc định
   map = L.map("map").setView([DEFAULT_LAT, DEFAULT_LNG], 12);
 
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -51,14 +50,14 @@ function initMap(vehicleData) {
   var iconBlue = createCarIcon("#007bff");
   var iconRed = createCarIcon("#dc3545");
 
-  // Gọi hàm lấy vị trí thật ngay lập tức
+  // Gọi hàm lấy vị trí thật
   getUserLocation();
 
   // Vẽ các xe lên bản đồ
   vehicleData.forEach(function (xe) {
     var rawStatus = xe.status ? xe.status.toString() : "available";
     var statusNormal = rawStatus.toLowerCase().trim().replace(/_/g, " ");
-    var bookingUrl = "/bookings/create/" + xe.id + "/";
+    var bookingUrl = "/booking/create/" + xe.id + "/";
 
     var statusConfig = {
       label: "Sẵn sàng",
@@ -147,9 +146,9 @@ function initMap(vehicleData) {
   });
 }
 
-// ============================================================
-// 2. LẤY VỊ TRÍ NGƯỜI DÙNG (GEOLOCATION)
-// ============================================================
+// =========================
+// 2. LẤY VỊ TRÍ NGƯỜI DÙNG
+// =========================
 function getUserLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -186,9 +185,9 @@ function getUserLocation() {
   }
 }
 
-// ============================================================
-// 3. TÍNH TOÁN LỘ TRÌNH & DỊCH THUẬT (CALCULATE ROUTE)
-// ============================================================
+// ===================================
+// 3. TÍNH TOÁN LỘ TRÌNH & DỊCH THUẬT
+// ===================================
 window.calculateRoute = function (destLat, destLng) {
   if (userLat === null || userLng === null) {
     alert(
@@ -245,7 +244,7 @@ window.calculateRoute = function (destLat, destLng) {
       `;
       document.getElementById("route-summary").innerHTML = summaryHTML;
 
-      // --- BỘ DỊCH THUẬT SẠCH SẼ (V4) ---
+      // --- BỘ DỊCH THUẬT ---
       var instructions = route.instructions;
       var listHTML = "";
 
@@ -269,7 +268,7 @@ window.calculateRoute = function (destLat, destLng) {
           )
           .replace(/Into the (?:traffic circle|roundabout)/gi, "Vào vòng xoay")
 
-          // 2. Hành động lái xe (Sửa lỗi "Make a...")
+          // 2. Hành động lái xe
           .replace(/Make a U-turn/gi, "Quay đầu xe")
           .replace(/Make a (?:sharp|slight) right/gi, "Cua sang phải")
           .replace(/Make a (?:sharp|slight) left/gi, "Cua sang trái")
@@ -344,11 +343,9 @@ window.calculateRoute = function (destLat, destLng) {
     .addTo(map);
 };
 
-// ============================================================
-// 4. QUẢN LÝ MODAL (CẦN WINDOW ĐỂ SỬA LỖI NÚT ĐÓNG)
-// ============================================================
-
-// SỬA LỖI NÚT ĐÓNG: Gán trực tiếp vào window
+// =================
+// 4. QUẢN LÝ MODAL
+// =================
 window.openModal = function () {
   var modal = document.getElementById("routeModal");
   if (modal) modal.style.display = "block";
@@ -405,3 +402,37 @@ window.onclick = function (event) {
   if (event.target == mTerms) mTerms.style.display = "none";
   if (event.target == mLoc) mLoc.style.display = "none";
 };
+
+// =====================================
+// 5. TỰ ĐỘNG KHỞI TẠO (AUTO INITIALIZE)
+// =====================================
+document.addEventListener("DOMContentLoaded", function () {
+  // 1. Tìm thẻ chứa dữ liệu JSON từ Django
+  const dataScript = document.getElementById("vehicles-data");
+
+  if (dataScript) {
+    try {
+      // 2. Parse lần 1: Lấy nội dung từ thẻ script
+      var vehicleData = JSON.parse(dataScript.textContent);
+
+      // 🛠️ FIX LỖI: Nếu kết quả vẫn là chuỗi (String), nghĩa là bị double-encoded
+      // -> Parse thêm một lần nữa để ra mảng thật (Array)
+      if (typeof vehicleData === "string") {
+        vehicleData = JSON.parse(vehicleData);
+      }
+
+      console.log("Dữ liệu xe chuẩn:", vehicleData);
+
+      // Kiểm tra lần cuối: Phải là mảng mới chạy
+      if (Array.isArray(vehicleData)) {
+        initMap(vehicleData);
+      } else {
+        console.error("Lỗi: Dữ liệu xe không đúng định dạng danh sách.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi đọc dữ liệu xe:", error);
+    }
+  } else {
+    console.warn("Không tìm thấy dữ liệu xe (ID: vehicles-data)");
+  }
+});
