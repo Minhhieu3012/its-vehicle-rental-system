@@ -1,4 +1,4 @@
-// 1. KHAI BÁO BIẾN TOÀN CỤC
+// KHAI BÁO BIẾN TOÀN CỤC
 var map;
 var userMarker;
 var currentRoute = null;
@@ -7,9 +7,9 @@ var currentRoute = null;
 var userLat = 10.7721;
 var userLng = 106.6983;
 
-// 2. HÀM KHỞI TẠO BẢN ĐỒ
+// HÀM KHỞI TẠO BẢN ĐỒ
 function initMap(vehicleData) {
-  // A. Khởi tạo Map
+  // Khởi tạo Map
   map = L.map("map").setView([userLat, userLng], 13);
 
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -17,7 +17,7 @@ function initMap(vehicleData) {
     attribution: "&copy; OpenStreetMap",
   }).addTo(map);
 
-  // --- B. ĐỊNH NGHĨA ICON CHUYÊN NGHIỆP (SVG) ---
+  // Định nghĩa icon (SVG)
   function createCarIcon(color) {
     var svgHtml = `
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="35" height="35">
@@ -38,7 +38,7 @@ function initMap(vehicleData) {
     });
   }
 
-  // --- CẬP NHẬT 4 MÀU ---
+  // Cập nhật màu
   var iconGreen = createCarIcon("#28a745"); // Available
   var iconYellow = createCarIcon("#ffc107"); // Booked
   var iconBlue = createCarIcon("#007bff"); // In Operation
@@ -55,41 +55,45 @@ function initMap(vehicleData) {
     shadowSize: [41, 41],
   });
 
-  // C. Tạo Marker User
+  // Tạo Marker User
   userMarker = L.marker([userLat, userLng], { icon: userIcon })
     .addTo(map)
     .bindPopup("<b>Bạn đang ở đây</b>");
 
   locateUser();
 
-  // D. VẼ XE VÀ CHỌN MÀU THEO TRẠNG THÁI
+  // Vẽ xe và chọn màu theo trạng thái
   vehicleData.forEach(function (xe) {
     // 1. Chuẩn hóa trạng thái
     var rawStatus = xe.status ? xe.status.toString() : "available";
-    // Thay thế dấu gạch dưới và khoảng trắng để so sánh dễ hơn
     var statusNormal = rawStatus.toLowerCase().trim().replace(/_/g, " ");
 
     // 2. Tạo link đặt xe
     var bookingUrl = "/bookings/create/" + xe.id + "/";
 
     // 3. Logic chọn icon (4 Cấp độ)
+    var statusDisplay = xe.status;
     var finalIcon;
 
     if (statusNormal === "maintenance" || statusNormal === "bao tri") {
       finalIcon = iconRed; // Bảo trì
+      statusDisplay = "Bảo trì 🔴";
     } else if (
       statusNormal === "in operation" ||
       statusNormal === "dang hoat dong"
     ) {
       finalIcon = iconBlue; // Đang chạy
+      statusDisplay = "Đang hoạt động 🔵";
     } else if (statusNormal === "booked" || statusNormal === "da dat") {
       finalIcon = iconYellow; // Đã đặt (nhưng chưa lấy xe)
+      statusDisplay = "Đã đặt 🟡";
     } else {
       finalIcon = iconGreen; // Sẵn sàng (Mặc định)
+      statusDisplay = "Sẵn sàng 🟢";
     }
 
-    // 4. Logic nút bấm (Chỉ Available mới được đặt)
-    // Các trạng thái khác (Booked, In Operation, Maintenance) đều không cho đặt
+    // Logic nút bấm
+    // Các trạng thái khác (Booked, In Operation, Maintenance) không thể đặt
     var isAvailable =
       statusNormal === "available" || statusNormal === "san sang";
 
@@ -97,15 +101,16 @@ function initMap(vehicleData) {
       ? "cursor:pointer; background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px;"
       : "background: #ccc; cursor: not-allowed; color: #666; border: none; padding: 5px 10px; border-radius: 3px;";
 
-    // 5. Vẽ Marker
+    // Vẽ Marker
     var marker = L.marker([xe.lat, xe.lng], { icon: finalIcon }).addTo(map);
 
-    // 6. Nội dung Popup
+    // Nội dung Popup
     var popupContent = `
             <div style="text-align: center;">
                 <h3 style="margin: 0; color: #007bff;">${xe.plate}</h3>
                 <p style="margin: 5px 0;"><b>${xe.name}</b></p>
-                <p>Trạng thái: <b>${xe.status}</b></p>
+
+                <p>Trạng thái: <b>${statusDisplay}</b></p>
 
                 <button onclick="chiDuong(${xe.lat}, ${xe.lng})" 
                     class="popup-btn" 
@@ -124,7 +129,7 @@ function initMap(vehicleData) {
   });
 }
 
-// 3. CÁC HÀM XỬ LÝ MODAL (UI/UX)
+// Hàm xử lý Modal
 function openModal() {
   document.getElementById("routeModal").style.display = "block";
 }
@@ -140,7 +145,7 @@ window.onclick = function (event) {
   }
 };
 
-// 4. HÀM XỬ LÝ GEOLOCATION
+// Hàm xử lý Geolocation
 function locateUser() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -158,7 +163,7 @@ function locateUser() {
   }
 }
 
-// 5. HÀM VẼ ĐƯỜNG & HIỆN MODAL
+// Hàm vẽ đường và hiện Modal chỉ đường
 window.chiDuong = function (destLat, destLng) {
   console.log("Đang tính toán đường đi...");
 
@@ -207,19 +212,38 @@ window.chiDuong = function (destLat, destLng) {
 
       instructions.forEach(function (step) {
         var icon = "⬆️";
-        if (step.text.includes("Left") || step.text.includes("left"))
-          icon = "⬅️";
-        if (step.text.includes("Right") || step.text.includes("right"))
-          icon = "➡️";
-        if (step.text.includes("Arrive") || step.text.includes("destination"))
-          icon = "🎯";
+        var text = step.text;
 
+        // Dịch sang tiếng Việt (Regex)
         var textVi = step.text
-          .replace("Head", "Đi về hướng")
-          .replace("Turn left", "Rẽ trái")
-          .replace("Turn right", "Rẽ phải")
-          .replace("onto", "vào đường")
-          .replace("You have arrived", "Bạn đã đến nơi");
+          .replace(/Head/g, "Đi về hướng")
+          .replace(/Continue/g, "Tiếp tục đi")
+          .replace(/Turn left/g, "Rẽ trái")
+          .replace(/Turn right/g, "Rẽ phải")
+          .replace(/Make a U-turn/g, "Quay đầu xe")
+          .replace(/Make a slight left/g, "Chếch sang trái")
+          .replace(/Make a slight right/g, "Chếch sang phải")
+          .replace(/Keep left/g, "Đi sang làn trái")
+          .replace(/Keep right/g, "Đi sang làn phải")
+          .replace(/onto/g, "vào đường")
+          .replace(/on /g, "trên đường ")
+          .replace(/to /g, "đến ")
+          .replace(/Enter the roundabout/g, "Vào vòng xoay")
+          .replace(/and take the/g, "và đi theo")
+          .replace(/exit/g, "lối ra")
+          .replace(/(\d+)th/g, "thứ $1")
+          .replace("You have arrived at your destination", "Bạn đã đến đích")
+          .replace("You have arrived", "Bạn đã đến nơi")
+          .replace("at your destination", "")
+          .trim();
+
+        // Logic chọn icon theo hướng
+        if (text.includes("Left") || text.includes("left")) icon = "⬅️";
+        if (text.includes("Right") || text.includes("right")) icon = "➡️";
+        if (text.includes("U-turn")) icon = "↩️";
+        if (text.includes("roundabout")) icon = "🔄";
+        if (text.includes("Arrive") || text.includes("destination"))
+          icon = "🎯";
 
         listHTML += `
             <li>
