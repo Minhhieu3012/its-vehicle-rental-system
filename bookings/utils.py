@@ -21,7 +21,7 @@ def is_weekend(d: date) -> bool:
 def get_unit_price_per_day(vehicle) -> Decimal:
     """
     Lấy giá theo ngày từ vehicle.
-    Ưu tiên price_per_day, fallback price_per_hour*24 nếu team db lỡ đặt theo giờ.
+    Ưu tiên price_per_day, fallback price_per_hour*24 
     """
     if hasattr(vehicle, "price_per_day") and vehicle.price_per_day is not None:
         return Decimal(str(vehicle.price_per_day))
@@ -33,7 +33,7 @@ def get_unit_price_per_day(vehicle) -> Decimal:
 def calc_total_price(vehicle, start_date: date, end_date: date) -> Decimal:
     """
     Dynamic Pricing: cuối tuần +20% (T7, CN).
-    Tính theo từng ngày để đúng logic (nếu booking kéo dài qua weekend).
+    Tính theo từng ngày để đúng logic 
     """
     base = get_unit_price_per_day(vehicle)
     if end_date < start_date:

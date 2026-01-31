@@ -14,10 +14,6 @@ def is_admin(user):
 
 
 def _vehicle_booked_code():
-    """
-    Team db thường dùng 'rented' (available/rented/maintenance).
-    Nếu team bạn dùng code khác thì đổi đúng 1 dòng return này.
-    """
     return "rented"
 
 
