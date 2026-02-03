@@ -9,7 +9,6 @@ urlpatterns = [
     # ==========================
     path('', views.home, name='home'),
     path('map/', views.map_view, name='map'),
-
     # ==========================
     # 2. XE & CHI TIẾT THUÊ XE
     # ==========================
@@ -57,3 +56,4 @@ urlpatterns = [
     # Đồng bộ tọa độ: Cập nhật vị trí xe trực tiếp từ Dashboard Modal
     path('dashboard/update-location/', views.update_vehicle_location, name='update_location'),
 ]
+

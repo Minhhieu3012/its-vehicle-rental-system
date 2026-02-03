@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'bookings',   # Quản lý Đặt xe
     'vehicles',   # Quản lý Xe & Map
     'reviews',   # Quản lý Đánh giá
+    'frontend',
 ]
 
 # 4. Middleware
@@ -91,7 +92,7 @@ USE_I18N = True
 USE_TZ = True
 
 # 9. Static files (CSS, JS, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # 10. Media files (Upload ảnh xe)
@@ -109,3 +110,13 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# 1. Nếu người dùng chưa đăng nhập mà cố vào trang kín -> Đá về trang này
+LOGIN_URL = 'frontend:login'
+
+# 2. Đăng nhập xong -> Chuyển hướng về Trang chủ (hoặc Map tùy bạn thích)
+LOGIN_REDIRECT_URL = 'frontend:home'  
+# Hoặc nếu muốn vào map luôn: LOGIN_REDIRECT_URL = 'vehicles:map'
+
+# 3. Đăng xuất xong -> Chuyển hướng về trang Đăng nhập (FIX LỖI CỦA BẠN Ở ĐÂY)
+LOGOUT_REDIRECT_URL = 'frontend:login'

@@ -1,154 +1,203 @@
-{% extends 'frontend/base.html' %}
-{% load static %}
-
-{% block title %}Bản đồ xe - ITS Rental{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin="" />
+{% extends 'frontend/base.html' %} {% load static %} {% block title %}Bản đồ xe
+- ITS Rental{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
 <style>
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
 
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
-        border-radius: 20px;
-    }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+  }
 
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #4b5563;
-    }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4b5563;
+  }
 
-    #map {
-        cursor: crosshair;
-    }
+  #map {
+    cursor: crosshair;
+  }
 
-    /* Đảm bảo Sidebar không bị che bởi map controls */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
+  /* Đảm bảo Sidebar không bị che bởi map controls */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="flex flex-col h-[calc(100vh-4rem)]">
-    <div class="flex flex-1 h-full overflow-hidden relative">
-        <aside class="w-full md:w-[400px] bg-white dark:bg-[#111b21] border-r border-gray-200 dark:border-gray-700 flex flex-col z-20 shadow-xl h-full shrink-0">
-            <div class="p-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-                <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
-                    <span class="material-symbols-outlined text-primary">search</span>
-                    Tìm xe
-                </h2>
-                <div class="space-y-4">
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-3.5 text-gray-400 text-[20px]">location_on</span>
-                        <input class="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-slate-400 text-slate-900 dark:text-white"
-                               placeholder="Nhập vị trí và nhấn Enter" id="location-search">
-                    </div>
+  <div class="flex flex-1 h-full overflow-hidden relative">
+    <aside
+      class="w-full md:w-[400px] bg-white dark:bg-[#111b21] border-r border-gray-200 dark:border-gray-700 flex flex-col z-20 shadow-xl h-full shrink-0"
+    >
+      <div class="p-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
+        <h2
+          class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white"
+        >
+          <span class="material-symbols-outlined text-primary">search</span>
+          Tìm xe
+        </h2>
+        <div class="space-y-4">
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-3 top-3.5 text-gray-400 text-[20px]"
+              >location_on</span
+            >
+            <input
+              class="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-slate-400 text-slate-900 dark:text-white"
+              placeholder="Nhập vị trí và nhấn Enter"
+              id="location-search"
+            />
+          </div>
 
-                    <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                        <button class="px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold whitespace-nowrap shadow-sm filter-btn"
-                                data-filter="all">
-                            Tất cả
-                        </button>
-                        <button class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors filter-btn"
-                                data-filter="Available">
-                            Có sẵn
-                        </button>
-                        <button class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors filter-btn"
-                                data-filter="Booked">
-                            Đã thuê
-                        </button>
-                    </div>
+          <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+            <button
+              class="px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold whitespace-nowrap shadow-sm filter-btn"
+              data-filter="all"
+            >
+              Tất cả
+            </button>
+            <button
+              class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors filter-btn"
+              data-filter="Available"
+            >
+              Có sẵn
+            </button>
+            <button
+              class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors filter-btn"
+              data-filter="Booked"
+            >
+              Đã thuê
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="flex-1 overflow-y-auto custom-scrollbar p-5 bg-slate-50 dark:bg-[#0b1216]"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <p
+            class="text-sm font-semibold text-slate-500 dark:text-slate-400"
+            id="vehicle-count"
+          >
+            {{ vehicles|length }} xe tìm thấy
+          </p>
+        </div>
+
+        <div class="space-y-4" id="vehicle-list">
+          {% for vehicle in vehicles %}
+          <div
+            class="bg-white dark:bg-[#16222b] rounded-lg p-3 shadow-sm border border-slate-100 dark:border-gray-800 cursor-pointer hover:border-primary dark:hover:border-primary transition-all group vehicle-card"
+            data-id="{{ vehicle.id }}"
+            data-status="{{ vehicle.status }}"
+          >
+            <div class="flex gap-4">
+              <div
+                class="w-28 h-20 bg-gray-100 dark:bg-gray-800 rounded-md overflow-hidden relative shrink-0"
+              >
+                <img
+                  class="w-full h-full object-cover"
+                  src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}"
+                  alt="{{ vehicle.name }}"
+                />
+                {% if vehicle.status != 'Available' %}
+                <div
+                  class="absolute inset-0 bg-black/40 flex items-center justify-center"
+                >
+                  <span
+                    class="text-[10px] text-white font-bold uppercase tracking-widest bg-red-600 px-2 py-0.5 rounded"
+                    >Đã thuê</span
+                  >
                 </div>
-            </div>
+                {% endif %}
+              </div>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-5 bg-slate-50 dark:bg-[#0b1216]">
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400" id="vehicle-count">
-                        {{ vehicles|length }} xe tìm thấy
-                    </p>
+              <div class="flex flex-col flex-1 justify-between">
+                <div>
+                  <div class="flex justify-between items-start">
+                    <h3
+                      class="font-bold text-slate-900 dark:text-white leading-tight"
+                    >
+                      {{ vehicle.name }}
+                    </h3>
+                    <div
+                      class="flex items-center gap-1 text-xs font-medium text-amber-500"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[14px] fill-current"
+                        >star</span
+                      >
+                      {{ vehicle.rating|default:"4.5" }}
+                    </div>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {{ vehicle.distance|default:"1.2" }} km • {{
+                    vehicle.location|default:"Trung tâm" }}
+                  </p>
                 </div>
 
-                <div class="space-y-4" id="vehicle-list">
-                    {% for vehicle in vehicles %}
-                    <div class="bg-white dark:bg-[#16222b] rounded-lg p-3 shadow-sm border border-slate-100 dark:border-gray-800 cursor-pointer hover:border-primary dark:hover:border-primary transition-all group vehicle-card"
-                         data-id="{{ vehicle.id }}"
-                         data-status="{{ vehicle.status }}">
-                        <div class="flex gap-4">
-                            <div class="w-28 h-20 bg-gray-100 dark:bg-gray-800 rounded-md overflow-hidden relative shrink-0">
-                                <img class="w-full h-full object-cover"
-                                     src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}"
-                                     alt="{{ vehicle.name }}">
-                                {% if vehicle.status != 'Available' %}
-                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                    <span class="text-[10px] text-white font-bold uppercase tracking-widest bg-red-600 px-2 py-0.5 rounded">Đã thuê</span>
-                                </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="flex flex-col flex-1 justify-between">
-                                <div>
-                                    <div class="flex justify-between items-start">
-                                        <h3 class="font-bold text-slate-900 dark:text-white leading-tight">{{ vehicle.name }}</h3>
-                                        <div class="flex items-center gap-1 text-xs font-medium text-amber-500">
-                                            <span class="material-symbols-outlined text-[14px] fill-current">star</span>
-                                            {{ vehicle.rating|default:"4.5" }}
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        {{ vehicle.distance|default:"1.2" }} km • {{ vehicle.location|default:"Trung tâm" }}
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-end mt-2">
-                                    <p class="text-primary font-bold text-lg">
-                                        {{ vehicle.price_per_day|floatformat:0 }}đ
-                                        <span class="text-slate-400 text-xs font-normal">/ngày</span>
-                                    </p>
-                                    <a href="{% url 'frontend:vehicle_detail' vehicle.id %}"
-                                       class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
-                                        Xem
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="text-center py-12 text-slate-400">
-                        <span class="material-symbols-outlined text-6xl mb-4">location_off</span>
-                        <p>Không tìm thấy xe nào</p>
-                    </div>
-                    {% endfor %}
+                <div class="flex justify-between items-end mt-2">
+                  <p class="text-primary font-bold text-lg">
+                    {{ vehicle.price_per_day|floatformat:0 }}đ
+                    <span class="text-slate-400 text-xs font-normal"
+                      >/ngày</span
+                    >
+                  </p>
+                  <a
+                    href="{% url 'frontend:vehicle_detail' vehicle.id %}"
+                    class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+                  >
+                    Xem
+                  </a>
                 </div>
+              </div>
             </div>
-        </aside>
+          </div>
+          {% empty %}
+          <div class="text-center py-12 text-slate-400">
+            <span class="material-symbols-outlined text-6xl mb-4"
+              >location_off</span
+            >
+            <p>Không tìm thấy xe nào</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
 
-        <main class="flex-1 relative bg-slate-200 h-full w-full">
-            <div id="map" class="w-full h-full z-10"></div>
+    <main class="flex-1 relative bg-slate-200 h-full w-full">
+      <div id="map" class="w-full h-full z-10"></div>
 
-            <div class="absolute bottom-6 right-6 z-[1000] flex flex-col gap-2">
-                <button class="bg-white dark:bg-[#111b21] text-slate-700 dark:text-slate-200 p-2 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors border border-slate-100 dark:border-gray-700"
-                        title="Vị trí của tôi" id="locate-me">
-                    <span class="material-symbols-outlined">my_location</span>
-                </button>
-            </div>
-        </main>
-    </div>
+      <div class="absolute bottom-6 right-6 z-[1000] flex flex-col gap-2">
+        <button
+          class="bg-white dark:bg-[#111b21] text-slate-700 dark:text-slate-200 p-2 rounded-lg shadow-lg hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors border border-slate-100 dark:border-gray-700"
+          title="Vị trí của tôi"
+          id="locate-me"
+        >
+          <span class="material-symbols-outlined">my_location</span>
+        </button>
+      </div>
+    </main>
+  </div>
 </div>
 
-{{ vehicles_json|json_script:"vehicles-data" }}
-{% endblock %}
+{{ vehicles_json|json_script:"vehicles-data" }} {% endblock %} {% block extra_js
+%}
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
 
-{% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
-<script src="{% static 'frontend/js/map.js' %}"></script>
+<script src="{% static 'vehicles/js/map_logic.js' %}"></script>
 {% endblock %}
