@@ -1,0 +1,65 @@
+﻿{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'frontend/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <ul>
+            <li><a href="{% url 'frontend:admin_dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'frontend:admin_vehicles' %}">Quản lý Xe</a></li>
+            <li><a href="{% url 'frontend:admin_bookings' %}" class="active">Quản lý Đặt chỗ</a></li>
+            <li><a href="{% url 'frontend:admin_stats' %}">Thống kê</a></li>
+        </ul>
+    </aside>
+
+    <main class="admin-content">
+        <h1>Quản lý Đặt chỗ</h1>
+        <table class="table admin-table">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Khách hàng</th>
+                    <th>Xe</th>
+                    <th>Ngày trả</th>
+                    <th>Trạng thái</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>#{{ booking.id }}</td>
+                    <td>{{ booking.customer.username }}</td>
+                    <td>{{ booking.vehicle.name }}</td>
+                    <td>{{ booking.end_date|date:"d/m/Y" }}</td>
+                    <td>
+                        <span class="badge badge-{{ booking.status|lower }}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if booking.status == 'pending' %}
+                        <a href="{% url 'frontend:approve_order' booking.id %}" class="btn btn-success btn-xs">
+                            Duyệt đơn
+                        </a>
+                        {% else %}
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Đã xử lý</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        Hiện tại chưa có đơn đặt chỗ nào trong hệ thống.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</div>
+{% endblock %}

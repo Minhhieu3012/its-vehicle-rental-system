@@ -1,0 +1,178 @@
+﻿{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}{{ vehicle.name }} - ITS Rental{% endblock %}
+
+{% block content %}
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{% url 'frontend:home' %}" class="text-sm font-medium text-slate-500 hover:text-primary">Trang chủ</a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-slate-400 text-lg mx-1">chevron_right</span>
+                    <a href="{% url 'frontend:vehicle_list' %}" class="text-sm font-medium text-slate-500 hover:text-primary">Xe</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-slate-400 text-lg mx-1">chevron_right</span>
+                    <span class="text-sm font-medium text-slate-900 dark:text-white">{{ vehicle.name }}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <div class="lg:col-span-8 space-y-8">
+
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                            {{ vehicle.vehicle_type }}
+                        </span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {{ vehicle.name }}
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-1">
+                        {{ vehicle.transmission|default:"Tự động" }} • {{ vehicle.get_fuel_type_display }} • {{ vehicle.seats|default:"5" }} chỗ
+                    </p>
+                </div>
+            </div>
+
+            <div class="rounded-xl overflow-hidden shadow-sm aspect-video relative group">
+                <div class="w-full h-full bg-cover bg-center"
+                     style='background-image: url("{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static "frontend/img/placeholder.jpg" %}{% endif %}");'>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+                </div>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800" />
+
+            <section>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Thông số kỹ thuật</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-primary mb-2">settings</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Hộp số</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.transmission|default:"Tự động" }}</span>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-primary mb-2">airline_seat_recline_normal</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Số chỗ</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.seats|default:"5" }} người</span>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-primary mb-2">local_gas_station</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Nhiên liệu</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.get_fuel_type_display|default:"Xăng" }}</span>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-primary mb-2">luggage</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Hành lý</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">3 va-li</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Mô tả</h3>
+                <div class="prose prose-slate dark:prose-invert text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <p>{{ vehicle.description|default:"Xe chất lượng cao, phù hợp cho mọi chuyến đi. Được bảo dưỡng định kỳ và kiểm tra kỹ lưỡng trước mỗi chuyến thuê." }}</p>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="lg:col-span-4">
+            <div class="sticky top-24 space-y-4">
+
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <div class="bg-primary/5 dark:bg-primary/10 p-4 border-b border-primary/10 dark:border-primary/20 flex items-baseline justify-between">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-bold text-slate-900 dark:text-white">
+                                {{ vehicle.price_per_day|floatformat:0 }}đ
+                            </span>
+                            <span class="text-slate-500 dark:text-slate-400 text-sm font-medium">/ ngày</span>
+                        </div>
+
+                        {% if vehicle.status == 'Available' %}
+                        <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-1 rounded">
+                            Có sẵn
+                        </span>
+                        {% else %}
+                        <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-bold px-2 py-1 rounded">
+                            Đã thuê
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if vehicle.status == 'Available' %}
+                    <form method="POST" action="{% url 'frontend:vehicle_payment' vehicle.id %}" class="p-6 space-y-5">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Nhận xe</label>
+                                <input name="pickup_date" type="date" required
+                                       class="w-full bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-primary focus:border-primary p-2.5">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Trả xe</label>
+                                <input name="return_date" type="date" required
+                                       class="w-full bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-primary focus:border-primary p-2.5">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full flex items-center justify-center h-12 bg-primary hover:bg-blue-600 text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.98]">
+                            Đặt xe ngay
+                        </button>
+
+                        <p class="text-center text-xs text-slate-400 dark:text-slate-500">
+                            Bạn chưa bị tính phí
+                        </p>
+                    </form>
+                    {% else %}
+                    <div class="p-6 text-center">
+                        <span class="material-symbols-outlined text-slate-300 text-5xl mb-4">block</span>
+                        <p class="text-slate-600 dark:text-slate-400">Xe hiện tại đang được thuê hoặc bảo trì</p>
+                        <p class="text-xs text-slate-500 mt-2">Vui lòng quay lại sau</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+                            <span class="material-symbols-outlined text-[20px]">verified_user</span>
+                        </div>
+                        <div>
+                            <h5 class="text-sm font-bold text-slate-900 dark:text-white">Hủy miễn phí</h5>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Hủy trước 24h</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                            <span class="material-symbols-outlined text-[20px]">clean_hands</span>
+                        </div>
+                        <div>
+                            <h5 class="text-sm font-bold text-slate-900 dark:text-white">Vệ sinh nâng cao</h5>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Khử trùng trước mỗi chuyến</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}
