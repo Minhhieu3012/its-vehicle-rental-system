@@ -51,13 +51,16 @@ def home(request):
     return render(request, 'frontend/pages/home.html', {'featured_vehicles': vehicles})
 
 def map_view(request):
+    """Hàm lấy dữ liệu xe thực tế truyền vào bản đồ ITS (Đã tối ưu logic gộp)"""
     if not Vehicle:
         return render(request, 'frontend/pages/map.html', {'vehicles': [], 'vehicles_json': []})
 
+    # Chỉ lấy những xe có tọa độ thực tế trên bản đồ
     vehicles = Vehicle.objects.exclude(Q(latitude__isnull=True) | Q(longitude__isnull=True))
     vehicles_json = []
     
     for v in vehicles:
+        # Xử lý lấy tọa độ linh hoạt từ nhiều tên trường (latitude/lat)
         lat = getattr(v, 'latitude', 0) or getattr(v, 'lat', 0)
         lng = getattr(v, 'longitude', 0) or getattr(v, 'lng', 0)
         
@@ -66,11 +69,13 @@ def map_view(request):
             'name': getattr(v, 'name', 'Xe'),
             'lat': float(lat),
             'lng': float(lng),
-            'status': getattr(v, 'status', ''),
+            'status': getattr(v, 'status', 'available'),
             'status_display': v.get_status_display() if hasattr(v, 'get_status_display') else str(v.status),
             'image_url': v.image.url if v.image else '/static/frontend/img/placeholder.jpg',
             'detail_url': reverse('frontend:vehicle_detail', args=[v.id]),
-            'price': float(getattr(v, 'price_per_day', 0) or getattr(v, 'daily_rate', 0))
+            'price': float(getattr(v, 'price_per_day', 0) or getattr(v, 'daily_rate', 0)),
+            'rating': 4.8,  # Dữ liệu khớp với map_logic.js của Hiếu
+            'trips': 12     # Dữ liệu khớp với map_logic.js của Hiếu
         })
 
     return render(request, 'frontend/pages/map.html', {

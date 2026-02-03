@@ -1,0 +1,126 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ITS Map Module</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+    />
+
+    <link rel="stylesheet" href="{% static 'vehicles/css/map_style.css' %}" />
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <div id="routeModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>📍 Chi tiết lộ trình</h3>
+          <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="route-summary" class="summary-box">Đang tải...</div>
+          <h4>Hướng dẫn di chuyển:</h4>
+          <ul id="route-instructions" class="instruction-list"></ul>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="termsModal" class="modal-overlay">
+      <div class="modal-content modal-lg">
+        <div class="modal-header header-dark">
+          <h3>📜 ĐIỀU KHOẢN & CHÍNH SÁCH THUÊ XE</h3>
+          <span class="close-btn text-white" onclick="closeTermsModal()"
+            >&times;</span
+          >
+        </div>
+        <div class="modal-body scrollable-body">
+          <div class="term-highlight-box">
+            <div>
+              <span class="text-label">Đang xem chính sách cho xe:</span>
+              <h3 id="term-car-name" class="text-success">Tên xe...</h3>
+            </div>
+            <div class="text-right">
+              <span class="text-label">Đơn giá tiêu chuẩn:</span>
+              <strong id="term-car-price" class="text-danger">0đ/ngày</strong>
+            </div>
+          </div>
+
+          <div class="policy-content">
+            <h5 class="policy-title">1. GIÁ THUÊ</h5>
+            <ul class="policy-list">
+              <li>Giá thuê theo từng loại xe. Tính theo ngày (24h).</li>
+              <li>
+                <strong>Trả xe trễ:</strong> Dưới 1h miễn phí, 1-3h +200k, >3h
+                tính 1 ngày.
+              </li>
+            </ul>
+            <div class="policy-note">
+              <strong>LƯU Ý:</strong> Đọc kỹ điều khoản trước khi thuê.<br />
+              Hotline: 0909.xxx.xxx - Email: hotro@thuexeits.vn
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel bg-dark" onclick="closeTermsModal()">
+            Đã hiểu & Đồng ý
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="locationModal" class="modal-overlay">
+      <div class="modal-content modal-md">
+        <div class="modal-header header-info">
+          <h3>📍 Thông tin địa điểm</h3>
+          <span class="close-btn text-white" onclick="closeLocationModal()"
+            >&times;</span
+          >
+        </div>
+        <div class="modal-body p-20">
+          <h4 id="loc-car-name" class="loc-title">Tên xe...</h4>
+          <div class="mt-15">
+            <p>
+              <strong>🏠 Địa chỉ lấy xe:</strong><br />
+              <span class="loc-address"
+                >123 Nguyễn Văn Linh, P. Tân Phú, Q.7, TP.HCM</span
+              >
+            </p>
+            <p><strong>🕐 Giờ mở cửa:</strong> <b>7:00 - 22:00</b></p>
+            <p>
+              <strong>📞 Liên hệ:</strong>
+              <a href="tel:0901234567" class="phone-link">090 123 4567</a>
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer flex-end">
+          <button id="btn-view-map" class="btn-cancel flex-1">
+            🔍 Xem bản đồ
+          </button>
+          <button id="btn-start-route" class="btn-confirm flex-1">
+            ↗️ Chỉ đường
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {{ vehicles_json|json_script:"vehicles-data" }}
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+    <script src="{% static 'vehicles/js/map_logic.js' %}"></script>
+  </body>
+</html>
