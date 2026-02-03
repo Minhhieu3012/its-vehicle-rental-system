@@ -28,10 +28,6 @@ INSTALLED_APPS = [
     'bookings',   # Quản lý Đặt xe
     'vehicles',   # Quản lý Xe & Map
     'reviews',   # Quản lý Đánh giá
-   
-    
-    # App Giao diện (Lấy từ nhánh Frontend)
-    'frontend',   
 ]
 
 # 4. Middleware
