@@ -415,8 +415,6 @@ document.addEventListener("DOMContentLoaded", function () {
       // 2. Parse lần 1: Lấy nội dung từ thẻ script
       var vehicleData = JSON.parse(dataScript.textContent);
 
-      // 🛠️ FIX LỖI: Nếu kết quả vẫn là chuỗi (String), nghĩa là bị double-encoded
-      // -> Parse thêm một lần nữa để ra mảng thật (Array)
       if (typeof vehicleData === "string") {
         vehicleData = JSON.parse(vehicleData);
       }

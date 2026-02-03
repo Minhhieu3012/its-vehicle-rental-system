@@ -1,8 +1,3 @@
-"""
-Django settings for vehicleRentalSystem project.
-FILE ĐÃ MERGE: Hỗ trợ cả Map, Frontend, Review và Upload ảnh.
-"""
-
 from pathlib import Path
 import os
 
@@ -47,7 +42,6 @@ ROOT_URLCONF = 'vehicleRentalSystem.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend' / 'templates'], # Trỏ về thư mục chứa giao diện đẹp
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,10 +92,6 @@ USE_TZ = True
 
 # 9. Static files (CSS, JS, Images)
 STATIC_URL = 'static/'
-# Thêm đường dẫn Static của Frontend vào để Django tìm thấy file CSS/JS
-STATICFILES_DIRS = [
-    BASE_DIR / "frontend" / "static", 
-]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # 10. Media files (Upload ảnh xe)
