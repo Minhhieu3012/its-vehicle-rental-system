@@ -172,6 +172,14 @@ document.addEventListener("DOMContentLoaded", function () {
                             searchMarker = L.marker([lat, lon]).addTo(map)
                                 .bindPopup(`<b>Vị trí tìm thấy:</b><br>${address}`).openPopup();
 
+                            // Xóa marker khi đóng popup
+                            searchMarker.on('popupclose', function() {
+                                if (searchMarker) {
+                                    map.removeLayer(searchMarker);
+                                    searchMarker = null;
+                                }
+                            });
+
                             map.flyTo([lat, lon], 16, { duration: 1.5 });
                         } else {
                             alert("Không tìm thấy địa chỉ này!");
