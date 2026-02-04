@@ -1,0 +1,175 @@
+﻿{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'frontend/css/admin.css' %}">
+<style>
+    /* 1. Sửa lỗi Sidebar dính chữ */
+    .admin-sidebar {
+        width: 260px;
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        padding: 1.5rem 1rem;
+        min-height: calc(100vh - 4rem);
+    }
+    .admin-sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.75rem 1rem;
+        color: #475569;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        text-decoration: none;
+        margin-bottom: 4px;
+    }
+    .admin-sidebar a:hover, .admin-sidebar a.active {
+        background: #0ea5e9;
+        color: white;
+    }
+
+    /* 2. Thanh điều hướng Breadcrumbs (Thay cho dòng chữ dính nhau) */
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .breadcrumb-item {
+        color: #64748b;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .breadcrumb-item:hover {
+        color: #0ea5e9;
+        text-decoration: underline;
+    }
+    .breadcrumb-separator {
+        color: #cbd5e1;
+    }
+
+    /* 3. Tối ưu Form Thêm xe chuyên nghiệp */
+    .form-card {
+        max-width: 850px;
+        margin: 0 auto;
+        background: white;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+    }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label {
+        display: block;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    /* Đồng bộ Style cho các widget Django form */
+    .admin-form input, .admin-form select, .admin-form textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        background-color: #f8fafc;
+        transition: all 0.2s;
+        font-size: 0.938rem;
+    }
+    .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex bg-slate-50 min-h-screen">
+    <aside class="admin-sidebar shrink-0">
+        <nav>
+            <a href="{% url 'frontend:admin_dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            <a href="{% url 'frontend:admin_vehicles' %}" class="active">
+                <span class="material-symbols-outlined">directions_car</span> Quản lý Xe
+            </a>
+            <a href="{% url 'frontend:admin_bookings' %}">
+                <span class="material-symbols-outlined">calendar_month</span> Đặt chỗ
+            </a>
+            <a href="{% url 'frontend:admin_stats' %}">
+                <span class="material-symbols-outlined">bar_chart</span> Thống kê
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-10">
+        <div class="max-w-4xl mx-auto">
+            <nav class="breadcrumb-nav">
+                <a href="{% url 'frontend:admin_dashboard' %}" class="breadcrumb-item">Dashboard</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{% url 'frontend:admin_vehicles' %}" class="breadcrumb-item">Quản lý Xe</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="text-slate-400">Thêm xe mới</span>
+            </nav>
+
+            <div class="flex items-center gap-4 mb-8">
+                <a href="{% url 'frontend:admin_vehicles' %}" class="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-slate-200 text-slate-400 hover:text-primary transition-all">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-800">{{ title|default:"Thêm phương tiện mới" }}</h1>
+                    <p class="text-slate-500 text-sm">Điền đầy đủ thông tin chi tiết để thêm phương tiện vào hệ thống.</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'frontend:admin_vehicle_add' %}" class="admin-form">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                        {% for field in form %}
+                        <div class="form-group {% if field.name == 'description' %}md:col-span-2{% endif %}">
+                            <label class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                <p class="text-red-500 text-xs italic font-medium mt-1.5 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">error</span>
+                                    {{ error }}
+                                </p>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if field.help_text %}
+                            <p class="text-slate-400 text-xs mt-1.5">{{ field.help_text }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="flex justify-end gap-4 mt-8 pt-6 border-t border-slate-100 flex-wrap">
+                        <a href="{% url 'frontend:admin_vehicles' %}" class="px-6 py-2.5 text-slate-500 font-bold hover:bg-slate-100 rounded-lg transition-all">Hủy bỏ</a>
+                        <button type="submit" class="px-8 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg shadow-md transition-all transform active:scale-95 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">save</span>
+                            Lưu phương tiện
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

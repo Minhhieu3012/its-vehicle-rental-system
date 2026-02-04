@@ -1,0 +1,59 @@
+﻿from django.urls import path
+from . import views
+
+app_name = 'frontend'
+
+urlpatterns = [
+    # ==========================
+    # 1. TRANG CHỦ & CƠ BẢN
+    # ==========================
+    path('', views.home, name='home'),
+    path('map/', views.map_view, name='map'),
+    # ==========================
+    # 2. XE & CHI TIẾT THUÊ XE
+    # ==========================
+    path('thue-xe/', views.vehicle_list, name='vehicle_list'),
+    # Đồng bộ dùng vehicle_id để khớp với xử lý logic trong views.py
+    path('thue-xe/<int:vehicle_id>/', views.vehicle_detail, name='vehicle_detail'),
+    path('thue-xe/<int:vehicle_id>/payment/', views.vehicle_payment, name='vehicle_payment'),
+    
+    # ==========================
+    # 3. HỆ THỐNG XÁC THỰC (AUTH)
+    # ==========================
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('auth/logout/', views.logout_view, name='logout'),
+
+    # ==========================
+    # 4. QUẢN LÝ ĐƠN HÀNG (USER)
+    # ==========================
+    path('my-orders/', views.order_list, name='order_list'),
+    # Đồng bộ dùng booking_id để xử lý trả xe và đánh giá
+    path('my-orders/<int:booking_id>/return/', views.booking_return, name='booking_return'),
+    path('my-orders/<int:booking_id>/review/', views.review_form, name='review_form'),
+    
+    # ==========================================
+    # 5. QUẢN TRỊ VIÊN (ADMIN DASHBOARD)
+    # ==========================================
+    # Giao diện tổng quan quản trị
+    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    
+    # URL cho Sidebar & Quản lý danh sách
+    path('dashboard/vehicles/', views.admin_vehicle_list, name='admin_vehicles'),
+    path('dashboard/bookings/', views.admin_booking_list, name='admin_bookings'),
+    path('dashboard/stats/', views.admin_stats, name='admin_stats'),
+
+    # Chức năng thêm xe mới trực tiếp trên giao diện Admin tùy chỉnh
+    path('dashboard/vehicles/add/', views.admin_vehicle_create, name='admin_vehicle_add'),
+    
+    # Logic tác vụ nhanh (Quick Actions)
+    # Phê duyệt đơn: Kích hoạt Signal đổi màu xe trên bản đồ ITS
+    path('dashboard/approve/<int:booking_id>/', views.approve_order, name='approve_order'),
+    
+    # Logic mở trạng thái xe thủ công: Admin chuyển trạng thái xe về Available
+    path('dashboard/vehicles/release/<int:vehicle_id>/', views.admin_release_vehicle, name='admin_release_vehicle'),
+    
+    # Đồng bộ tọa độ: Cập nhật vị trí xe trực tiếp từ Dashboard Modal
+    path('dashboard/update-location/', views.update_vehicle_location, name='update_location'),
+]
+

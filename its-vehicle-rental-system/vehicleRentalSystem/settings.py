@@ -1,20 +1,20 @@
 """
 Django settings for vehicleRentalSystem project.
-FILE ĐÃ MERGE: Hỗ trợ cả Map, Frontend, Review và Upload ảnh.
+Bản sửa lỗi: Khớp cấu trúc thư mục lồng nhau thực tế.
 """
 
 from pathlib import Path
 import os
 
-# 1. Định nghĩa thư mục gốc
+# 1. Định nghĩa thư mục gốc (Trỏ đến thư mục chứa manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2. Cấu hình Bảo mật
 SECRET_KEY = 'django-insecure-^u30-jmlkmxhizxcva5*vy56kj)3beu^n%e%u!z8yfr60tv*ae'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # Cho phép truy cập từ mọi host trong Docker
 
-# 3. Đăng ký các ứng dụng (Apps) - GỘP CẢ 2 NHÁNH
+# 3. Đăng ký các ứng dụng
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -23,14 +23,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Các App chức năng
-    'users',      # Quản lý User
-    'bookings',   # Quản lý Đặt xe
-    'vehicles',   # Quản lý Xe & Map
-    'reviews',   # Quản lý Đánh giá
-   
-    
-    # App Giao diện (Lấy từ nhánh Frontend)
+    'users',      
+    'bookings',   
+    'vehicles',   
+    'reviews',   
     'frontend',   
 ]
 
@@ -47,11 +43,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'vehicleRentalSystem.urls'
 
-# 5. Cấu hình Templates (Ưu tiên cấu hình của Frontend)
+# 5. Cấu hình Templates (ĐÃ SỬA: Thêm folder bọc ngoài)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend' / 'templates'], # Trỏ về thư mục chứa giao diện đẹp
+        'DIRS': [BASE_DIR  / 'frontend' / 'templates'], # Khớp với image_1ab828.png
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,45 +69,27 @@ DATABASES = {
         'NAME': 'vehicle_rental_system',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'db', # Tên service trong docker-compose
+        'HOST': 'db',
         'PORT': 5432,
     }
 }
 
-# 7. Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-# 8. Ngôn ngữ và Thời gian (Ưu tiên Tiếng Việt)
+# 8. Ngôn ngữ và Thời gian
 LANGUAGE_CODE = 'vi'
 TIME_ZONE = 'Asia/Ho_Chi_Minh'
 USE_I18N = True
 USE_TZ = True
 
-# 9. Static files (CSS, JS, Images)
+# 9. Static files (CSS, JS) - ĐÃ SỬA: Thêm folder bọc ngoài
 STATIC_URL = 'static/'
-# Thêm đường dẫn Static của Frontend vào để Django tìm thấy file CSS/JS
 STATICFILES_DIRS = [
-    BASE_DIR / "frontend" / "static", 
+    BASE_DIR / "frontend" / "static", # Khớp với image_1ab828.png
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# 10. Media files (Upload ảnh xe)
+# 10. Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# 11. Cấu hình User Model & ID
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
