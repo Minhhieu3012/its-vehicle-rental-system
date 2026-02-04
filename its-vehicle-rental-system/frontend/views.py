@@ -35,7 +35,6 @@ def is_admin(user):
 
 def home(request):
     if Vehicle:
-        # Lấy 8 xe mới nhất để hiển thị ở trang chủ
         vehicles = Vehicle.objects.all().order_by('-id')[:8]
     else:
         vehicles = []
@@ -51,16 +50,13 @@ def home(request):
     return render(request, 'frontend/pages/home.html', {'featured_vehicles': vehicles})
 
 def map_view(request):
-    """Hàm lấy dữ liệu xe thực tế truyền vào bản đồ ITS (Đã tối ưu logic gộp)"""
     if not Vehicle:
         return render(request, 'frontend/pages/map.html', {'vehicles': [], 'vehicles_json': []})
 
-    # Chỉ lấy những xe có tọa độ thực tế trên bản đồ
     vehicles = Vehicle.objects.exclude(Q(latitude__isnull=True) | Q(longitude__isnull=True))
     vehicles_json = []
     
     for v in vehicles:
-        # Xử lý lấy tọa độ linh hoạt từ nhiều tên trường (latitude/lat)
         lat = getattr(v, 'latitude', 0) or getattr(v, 'lat', 0)
         lng = getattr(v, 'longitude', 0) or getattr(v, 'lng', 0)
         
@@ -104,7 +100,6 @@ def vehicle_detail(request, vehicle_id):
 def vehicle_payment(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
     
-    # Lấy ngày từ POST (khi ấn từ trang Detail) hoặc GET (khi ấn từ Bản đồ)
     pickup_str = request.POST.get('pickup_date') or request.GET.get('pickup_date', '')
     return_str = request.POST.get('return_date') or request.GET.get('return_date', '')
     
@@ -112,21 +107,27 @@ def vehicle_payment(request, vehicle_id):
         p_date = datetime.strptime(pickup_str.split(',')[0].strip(), "%Y-%m-%d").date()
         r_date = datetime.strptime(return_str.split(',')[0].strip(), "%Y-%m-%d").date()
     except (ValueError, AttributeError, IndexError, TypeError):
-        # Nếu không có ngày truyền vào, mặc định thuê 1 ngày bắt đầu từ hôm nay
         p_date = datetime.now().date()
         r_date = p_date + timedelta(days=1) 
 
-    # --- KHẮC PHỤC LỖI: Gọi hàm tính toán đã gộp phụ phí 20% cuối tuần ---
-    if hasattr(vehicle, 'calculate_total_price'):
-        total_price = vehicle.calculate_total_price(p_date, r_date)
-    else:
-        # Logic dự phòng nếu Model chưa kịp đồng bộ
-        delta = r_date - p_date
-        days = delta.days if delta.days > 0 else 1
-        total_price = vehicle.price_per_day * days
+    # --- LOGIC TÍNH TOÁN CHI TIẾT PHỤ PHÍ CUỐI TUẦN 20% ---
+    weekday_count = 0
+    weekend_count = 0
+    daily_rate = float(getattr(vehicle, 'price_per_day', 0) or getattr(vehicle, 'daily_rate', 0))
+    
+    current_date = p_date
+    while current_date < r_date:
+        if current_date.weekday() >= 5: # 5 là Thứ 7, 6 là Chủ nhật
+            weekend_count += 1
+        else:
+            weekday_count += 1
+        current_date += timedelta(days=1)
 
-    delta = r_date - p_date
-    days = delta.days if delta.days > 0 else 1
+    weekday_total = weekday_count * daily_rate
+    weekend_total = weekend_count * (daily_rate * 1.2)
+    base_total = weekday_total + weekend_total
+    tax_fee = base_total * 0.1 # Thuế & phí 10%
+    final_total = base_total + tax_fee
 
     if request.method == 'POST' and 'payment_method' in request.POST:
         try:
@@ -135,10 +136,9 @@ def vehicle_payment(request, vehicle_id):
                 vehicle=vehicle,
                 start_date=p_date,
                 end_date=r_date,
-                total_price=total_price,
+                total_price=final_total,
                 status='pending'
             )
-            # Tự động cập nhật xe sang trạng thái Booked khi khách đặt
             vehicle.status = 'Booked'
             vehicle.save()
             messages.success(request, "Thanh toán thành công! Đơn hàng đang chờ xác nhận.")
@@ -148,8 +148,17 @@ def vehicle_payment(request, vehicle_id):
             return redirect(f'/thue-xe/{vehicle_id}/')
 
     return render(request, 'frontend/bookings/payment.html', {
-        'vehicle': vehicle, 'pickup_date': p_date, 'return_date': r_date,
-        'days': days, 'total_price': total_price, 'is_weekend': p_date.weekday() >= 5
+        'vehicle': vehicle,
+        'pickup_date': p_date,
+        'return_date': r_date,
+        'days': weekday_count + weekend_count,
+        'weekday_count': weekday_count,
+        'weekend_count': weekend_count,
+        'weekday_total': weekday_total,
+        'weekend_total': weekend_total,
+        'weekend_rate': daily_rate * 1.2,
+        'tax_fee': tax_fee,
+        'final_total': final_total
     })
 
 @login_required(login_url='frontend:login')
@@ -180,11 +189,9 @@ def order_list(request):
 
 @login_required(login_url='frontend:login')
 def booking_return(request, booking_id):
-    """Xử lý khách hàng trả xe: ĐỒNG BỘ Cập nhật trạng thái về 'Available' chuẩn xác"""
     booking = get_object_or_404(Booking, pk=booking_id, customer=request.user)
     if request.method == 'POST':
         booking.status = 'completed'
-        # Cập nhật trạng thái xe về chuẩn 'Available'
         booking.vehicle.status = 'Available' 
         booking.vehicle.save()
         booking.save()
@@ -217,7 +224,6 @@ def review_form(request, booking_id):
 
 @user_passes_test(is_admin, login_url='frontend:login')
 def admin_dashboard(request):
-    """Trang tổng quan quản trị với dữ liệu thật"""
     total_rev = Booking.objects.filter(status='completed').aggregate(Sum('total_price'))['total_price__sum'] or 0
     new_bookings = Booking.objects.filter(status='pending').count()
     active_rentals = Booking.objects.filter(status='approved').count()
@@ -235,18 +241,16 @@ def admin_dashboard(request):
 
 @user_passes_test(is_admin)
 def admin_vehicle_list(request):
-    """Quản lý danh sách xe chi tiết cho Admin"""
     vehicles = Vehicle.objects.all().order_by('-id')
     return render(request, 'frontend/admin/vehicles.html', {'vehicles': vehicles})
 
 @user_passes_test(is_admin)
 def admin_vehicle_create(request):
-    """Thêm xe mới và điều hướng chuẩn xác về danh sách Admin"""
     if request.method == 'POST':
         form = VehicleForm(request.POST, request.FILES)
         if form.is_valid():
             vehicle = form.save() 
-            messages.success(request, f"Đã thêm xe {vehicle.name} vào hệ thống thành công!")
+            messages.success(request, f"Đã thêm xe {vehicle.name} thành công!")
             return redirect('frontend:admin_vehicles')
         else:
             messages.error(request, "Vui lòng kiểm tra lại các trường dữ liệu nhập vào.")
@@ -256,13 +260,11 @@ def admin_vehicle_create(request):
 
 @user_passes_test(is_admin)
 def admin_booking_list(request):
-    """Danh sách tất cả đơn hàng cho Admin"""
     bookings = Booking.objects.all().order_by('-created_at')
     return render(request, 'frontend/admin/bookings.html', {'bookings': bookings})
 
 @user_passes_test(is_admin)
 def admin_stats(request):
-    """Trang thống kê hệ thống với biểu đồ doanh thu theo tháng"""
     total_completed = Booking.objects.filter(status='completed').count()
     total_cancelled = Booking.objects.filter(status='cancelled').count()
     current_year = datetime.now().year
@@ -285,10 +287,9 @@ def admin_stats(request):
 
 @user_passes_test(is_admin)
 def approve_order(request, booking_id):
-    """Admin phê duyệt đơn: Cập nhật trạng thái Booking và trạng thái Xe"""
     booking = get_object_or_404(Booking, id=booking_id)
     booking.status = 'approved'
-    booking.vehicle.status = 'Booked' # Đồng bộ chuỗi 'Booked'
+    booking.vehicle.status = 'Booked'
     booking.vehicle.save()
     booking.save() 
     messages.success(request, f"Đã phê duyệt đơn hàng cho xe {booking.vehicle.name}")
@@ -296,16 +297,14 @@ def approve_order(request, booking_id):
 
 @user_passes_test(is_admin)
 def admin_release_vehicle(request, vehicle_id):
-    """Admin mở trạng thái xe thủ công về 'Available'"""
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
-    vehicle.status = 'Available' # Đồng bộ chuỗi chuẩn 'Available'
+    vehicle.status = 'Available'
     vehicle.save()
     messages.success(request, f"Đã mở trạng thái cho xe {vehicle.name} thành 'Có sẵn'.")
     return redirect('frontend:admin_vehicles')
 
 @user_passes_test(is_admin)
 def update_vehicle_location(request):
-    """Cập nhật tọa độ xe từ giao diện Admin"""
     if request.method == 'POST':
         v_id = request.POST.get('vehicle_id')
         lat = request.POST.get('latitude')
@@ -322,16 +321,13 @@ def update_vehicle_location(request):
 # ==========================================
 
 def login_view(request):
-    """Xử lý đăng nhập phân quyền: Admin vào Dashboard, User vào Home"""
     if request.method == 'POST':
         form = UserLoginForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            
-            # Kiểm tra quyền Staff để điều hướng tách biệt
             if user.is_staff:
-                messages.success(request, f"Chào mừng Admin {user.username} quay trở lại!")
+                messages.success(request, f"Chào mừng Admin {user.username}!")
                 return redirect('frontend:admin_dashboard')
             else:
                 return redirect('frontend:home')

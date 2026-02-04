@@ -34,14 +34,14 @@
                 <div>
                     <div class="flex items-center gap-2 mb-2">
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-                            {{ vehicle.vehicle_type }}
+                            {{ vehicle.get_vehicle_type_display }}
                         </span>
                     </div>
                     <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
                         {{ vehicle.name }}
                     </h1>
                     <p class="text-slate-500 dark:text-slate-400 mt-1">
-                        {{ vehicle.transmission|default:"Tự động" }} • {{ vehicle.get_fuel_type_display }} • {{ vehicle.seats|default:"5" }} chỗ
+                        {{ vehicle.transmission|default:"Tự động" }} • {{ vehicle.fuel_display }} • {{ vehicle.seats }} chỗ
                     </p>
                 </div>
             </div>
@@ -58,6 +58,7 @@
             <section>
                 <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Thông số kỹ thuật</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
                     <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
                         <span class="material-symbols-outlined text-3xl text-primary mb-2">settings</span>
                         <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Hộp số</span>
@@ -67,19 +68,21 @@
                     <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
                         <span class="material-symbols-outlined text-3xl text-primary mb-2">airline_seat_recline_normal</span>
                         <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Số chỗ</span>
-                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.seats|default:"5" }} người</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.seats }} người</span>
                     </div>
 
                     <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
                         <span class="material-symbols-outlined text-3xl text-primary mb-2">local_gas_station</span>
                         <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Nhiên liệu</span>
-                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.get_fuel_type_display|default:"Xăng" }}</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">{{ vehicle.fuel_display }}</span>
                     </div>
 
                     <div class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center hover:border-primary/50 transition-colors">
                         <span class="material-symbols-outlined text-3xl text-primary mb-2">luggage</span>
                         <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Hành lý</span>
-                        <span class="text-slate-900 dark:text-white font-medium mt-1">3 va-li</span>
+                        <span class="text-slate-900 dark:text-white font-medium mt-1">
+                            {% if vehicle.seats > 5 %}4 va-li{% elif vehicle.seats >= 4 %}3 va-li{% else %}1 va-li{% endif %}
+                        </span>
                     </div>
                 </div>
             </section>

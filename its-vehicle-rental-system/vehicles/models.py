@@ -58,6 +58,24 @@ class Vehicle(models.Model):
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # --- TỰ ĐỘNG XÁC ĐỊNH SỐ CHỖ DỰA TRÊN LOẠI XE ---
+    @property
+    def seats(self):
+        """Trả về số lượng chỗ ngồi thực tế dựa trên vehicle_type để hiển thị UI"""
+        if self.vehicle_type == 'car_7':
+            return 7
+        elif self.vehicle_type == 'car_4':
+            return 4
+        return 2  # Mặc định cho 'bike'
+
+    # --- TỰ ĐỘNG XÁC ĐỊNH NHIÊN LIỆU ---
+    @property
+    def fuel_display(self):
+        """Trả về nhãn nhiên liệu tương ứng với từng loại xe"""
+        if self.vehicle_type == 'bike':
+            return "Điện/Xăng"
+        return "Xăng"
+
     # --- HÀM TÍNH TỔNG TIỀN: DUYỆT TỪNG NGÀY ĐỂ TÍNH PHỤ PHÍ CHÍNH XÁC ---
     def calculate_total_price(self, pickup_date, return_date):
         """Tính tổng tiền: Từng ngày một + 20% phụ phí nếu rơi vào Thứ 7/CN"""
