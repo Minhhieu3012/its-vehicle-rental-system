@@ -1,172 +1,120 @@
 ﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/admin.css' %}">
-<style>
-    /* CSS Tối ưu UI để tách biệt dữ liệu rõ ràng */
-    .admin-table-container {
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-        margin-top: 1.5rem;
-    }
+{% block title %}Quản lý Xe - ITS Rental{% endblock %}
 
-    .admin-table thead {
-        background-color: #f8fafc;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .admin-table th {
-        padding: 1rem 1.5rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        color: #475569;
-    }
-
-    .admin-table td {
-        padding: 1rem 1.5rem !important;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .admin-table tr:hover {
-        background-color: #f8fafc;
-        transition: background-color 0.2s;
-    }
-
-    /* Đồng bộ Badge trạng thái */
-    .badge-custom {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        display: inline-block;
-    }
-
-    .badge-available {
-        background-color: #dcfce7;
-        color: #166534;
-    }
-
-    .badge-booked {
-        background-color: #fef9c3;
-        color: #854d0e;
-    }
-
-    .badge-maintenance {
-        background-color: #fee2e2;
-        color: #991b1b;
-    }
-
-    .btn-release {
-        color: #0284c7;
-        font-weight: 700;
-        font-size: 0.813rem;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        transition: color 0.2s;
-    }
-
-        .btn-release:hover {
-            color: #0369a1;
-            text-decoration: underline;
-        }
-</style>
+{% block header %}
+<header class="w-full bg-slate-900 text-white border-b border-slate-800 px-10 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
+        <h2 class="font-black text-xl tracking-tight uppercase">ITS Admin Panel</h2>
+    </div>
+    <div class="flex items-center gap-6">
+        <div class="text-right leading-none">
+            <p class="text-sm font-bold">{{ user.username }}</p>
+            <span class="text-[10px] text-primary font-black uppercase">Hệ thống quản trị</span>
+        </div>
+        <a href="{% url 'frontend:logout' %}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all">
+            Thoát hệ thống
+        </a>
+    </div>
+</header>
 {% endblock %}
 
 {% block content %}
-<div class="admin-wrapper">
-    <aside class="admin-sidebar">
+<div class="flex min-h-[calc(100vh-68px)]">
+    <aside class="w-64 hidden lg:block bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-4">
         <nav class="space-y-1">
-            <a href="{% url 'frontend:admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition">
+            <a href="{% url 'frontend:admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-all">
                 <span class="material-symbols-outlined">dashboard</span> Dashboard
             </a>
 
-            <a href="{% url 'frontend:admin_vehicles' %}" class="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium">
+            <a href="{% url 'frontend:admin_vehicles' %}" class="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium transition-all">
                 <span class="material-symbols-outlined">directions_car</span> Quản lý Xe
             </a>
 
-            <a href="{% url 'frontend:admin_bookings' %}" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition">
+            <a href="{% url 'frontend:admin_bookings' %}" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-all">
                 <span class="material-symbols-outlined">calendar_month</span> Đặt chỗ
             </a>
 
-            <a href="{% url 'frontend:admin_stats' %}" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition">
+            <a href="{% url 'frontend:admin_stats' %}" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-all">
                 <span class="material-symbols-outlined">bar_chart</span> Thống kê
             </a>
         </nav>
     </aside>
 
-    <main class="admin-content" style="padding: 2rem;">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-slate-800">Quản lý danh sách Xe</h1>
-            <a href="{% url 'frontend:admin_vehicle_add' %}" class="bg-primary hover:bg-sky-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all">
-                + Thêm xe mới
+    <div class="flex-1 p-6 lg:p-10 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Quản lý danh sách Xe</h1>
+            <a href="{% url 'frontend:admin_vehicle_add' %}" class="bg-primary hover:bg-sky-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">add</span>
+                Thêm xe mới
             </a>
         </div>
 
-        <div class="admin-table-container">
-            <table class="table admin-table w-full text-left border-collapse">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Thông tin Xe</th>
-                        <th>Biển số</th>
-                        <th>Trạng thái</th>
-                        <th class="text-center">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for vehicle in vehicles %}
-                    <tr>
-                        <td class="text-slate-500 font-medium">#{{ vehicle.id }}</td>
-                        <td>
-                            <div class="font-bold text-slate-900">{{ vehicle.name }}</div>
-                            <div class="text-xs text-slate-400">{{ vehicle.get_vehicle_type_display|default:"Phương tiện" }}</div>
-                        </td>
-                        <td>
-                            <code class="bg-slate-100 px-2 py-1 rounded text-slate-700 text-xs font-bold">{{ vehicle.license_plate }}</code>
-                        </td>
-                        <td>
-                            <span class="badge-custom badge-{{ vehicle.status|lower }}">
-                                {{ vehicle.get_status_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="flex items-center justify-center gap-4">
-                                {% if vehicle.status|upper != 'AVAILABLE' %}
-                                <a href="{% url 'frontend:admin_release_vehicle' vehicle.id %}"
-                                   class="btn-release"
-                                   onclick="return confirm('Mở trạng thái cho xe này?')">
-                                    <span class="material-symbols-outlined text-[18px]">lock_open</span> Mở
-                                </a>
-                                {% endif %}
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400">
+                        <tr>
+                            <th class="px-6 py-4 font-semibold">ID</th>
+                            <th class="px-6 py-4 font-semibold">THÔNG TIN XE</th>
+                            <th class="px-6 py-4 font-semibold">BIỂN SỐ</th>
+                            <th class="px-6 py-4 font-semibold">TRẠNG THÁI</th>
+                            <th class="px-6 py-4 font-semibold text-center">HÀNH ĐỘNG</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        {% for vehicle in vehicles %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-6 py-4 text-slate-500 font-medium">#{{ vehicle.id }}</td>
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-slate-900 dark:text-white">{{ vehicle.name }}</div>
+                                <div class="text-xs text-slate-400">{{ vehicle.get_vehicle_type_display|default:"Phương tiện" }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <code class="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300 text-xs font-bold">{{ vehicle.license_plate }}</code>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
+                                    {% if vehicle.status == 'available' %}bg-green-100 text-green-700
+                                    {% elif vehicle.status == 'booked' %}bg-yellow-100 text-yellow-700
+                                    {% else %}bg-red-100 text-red-700{% endif %}">
+                                    {{ vehicle.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-center gap-4">
+                                    {% if vehicle.status|upper != 'AVAILABLE' %}
+                                    <a href="{% url 'frontend:admin_release_vehicle' vehicle.id %}"
+                                       class="text-sky-600 hover:text-sky-700 transition-colors font-bold text-xs flex items-center gap-1"
+                                       onclick="return confirm('Mở trạng thái cho xe này?')">
+                                        <span class="material-symbols-outlined text-[18px]">lock_open</span> Mở
+                                    </a>
+                                    {% endif %}
 
-                                <a href="/admin/vehicles/vehicle/{{ vehicle.id }}/change/" class="text-slate-400 hover:text-primary transition-colors" title="Sửa">
-                                    <span class="material-symbols-outlined text-[20px]">edit</span>
-                                </a>
+                                    <a href="/admin/vehicles/vehicle/{{ vehicle.id }}/change/" class="text-slate-400 hover:text-primary transition-colors" title="Sửa">
+                                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                                    </a>
 
-                                <a href="/admin/vehicles/vehicle/{{ vehicle.id }}/delete/" class="text-slate-400 hover:text-red-600 transition-colors" title="Xóa">
-                                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center" style="padding: 4rem !important;">
-                            <p class="text-slate-400 italic">Chưa có phương tiện nào trong hệ thống.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                    <a href="/admin/vehicles/vehicle/{{ vehicle.id }}/delete/" class="text-slate-400 hover:text-red-600 transition-colors" title="Xóa">
+                                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="p-10 text-center text-slate-400">
+                                <span class="material-symbols-outlined text-4xl block mb-2">directions_car_off</span>
+                                Chưa có phương tiện nào trong hệ thống.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </main>
+    </div>
 </div>
 {% endblock %}
