@@ -80,13 +80,27 @@ def map_view(request):
     })
 
 def vehicle_list(request):
-    vehicles = Vehicle.objects.all() if Vehicle else []
+    vehicles = Vehicle.objects.all()
+
+    # ===== LỌC THEO LOẠI XE =====
+    vehicle_type = request.GET.get('vehicle_type')
+    if vehicle_type:
+        vehicles = vehicles.filter(vehicle_type=vehicle_type)
+
+    # ===== SẮP XẾP =====
     sort_by = request.GET.get('sort')
     if sort_by == 'price_asc':
         vehicles = vehicles.order_by('price_per_day')
     elif sort_by == 'price_desc':
         vehicles = vehicles.order_by('-price_per_day')
-    return render(request, 'frontend/vehicles/list.html', {'vehicles': vehicles})
+    else:
+        vehicles = vehicles.order_by('-id')
+
+    context = {
+        'vehicles': vehicles
+    }
+    return render(request, 'frontend/vehicles/list.html', context)
+
 
 def vehicle_detail(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, pk=vehicle_id)

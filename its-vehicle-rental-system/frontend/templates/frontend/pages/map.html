@@ -311,6 +311,65 @@
 
 
 {% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Lấy dữ liệu xe từ backend
+    const vehicles = JSON.parse(
+        document.getElementById("vehicles-data").textContent
+    );
+
+    const vehicleCards = document.querySelectorAll(".vehicle-card");
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const vehicleCount = document.getElementById("vehicle-count");
+
+    function applyFilter(filter) {
+        let visibleCount = 0;
+
+        vehicleCards.forEach((card, index) => {
+            const vehicle = vehicles[index];
+
+            if (!vehicle) return;
+
+            const status = vehicle.status?.toUpperCase();
+
+            let show = false;
+
+            if (filter === "all") {
+                show = true;
+            } else if (filter === "Available" && status === "AVAILABLE") {
+                show = true;
+            } else if (filter === "Booked" && status === "BOOKED") {
+                show = true;
+            }
+
+            card.style.display = show ? "block" : "none";
+            if (show) visibleCount++;
+        });
+
+        if (vehicleCount) {
+            vehicleCount.textContent = `${visibleCount} xe tìm thấy`;
+        }
+    }
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+
+            // UI active button
+            filterButtons.forEach(b => {
+                b.classList.remove("bg-primary", "text-white");
+                b.classList.add("bg-slate-100");
+            });
+
+            this.classList.add("bg-primary", "text-white");
+
+            const filter = this.dataset.filter;
+            applyFilter(filter);
+        });
+    });
+
+});
+</script>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
