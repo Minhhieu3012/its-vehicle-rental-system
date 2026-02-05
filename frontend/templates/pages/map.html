@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-<link rel="stylesheet" href="{% static 'vehicles/css/map_style.css' %}" />
+
+<link rel="stylesheet" href="{% static 'frontend/css/map_style.css' %}" />
 
 <style>
     /* 1. Đảm bảo Sidebar nằm TRÊN bản đồ nhưng không che mất Modal */
@@ -17,7 +18,7 @@
         pointer-events: auto !important;
     }
 
-    /* 2. Cấu hình bản đồ làm lớp nền */
+    /* 2. Cấu hình bản đồ làm lớp nền - Rất quan trọng để hiện bản đồ */
     #map {
         height: 100%;
         width: 100%;
@@ -82,6 +83,7 @@
 
         .policy-list li {
             margin-bottom: 4px;
+            font-size: 13.5px;
         }
 </style>
 {% endblock %}
@@ -89,7 +91,6 @@
 {% block content %}
 <div class="flex flex-col h-[calc(100vh-4rem)]">
     <div class="flex flex-1 h-full overflow-hidden relative">
-
         <aside class="w-full md:w-[400px] bg-white dark:bg-[#111b21] border-r border-gray-200 dark:border-gray-700 flex flex-col sidebar-container h-full shrink-0">
             <div class="p-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
                 <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
@@ -167,7 +168,7 @@
             <div class="space-y-3 text-sm text-slate-600">
                 <p><strong>🏠 Địa chỉ nhận xe:</strong><br><span class="loc-address">123 Nguyễn Văn Linh, P. Tân Phú, Q.7, TP.HCM</span></p>
                 <p><strong>🕐 Giờ hoạt động:</strong> <b>7:00 - 22:00</b></p>
-                <p><strong>📞 Hotline hỗ trợ:</strong> <a href="tel:0901234567" class="text-primary font-bold">090 123 4567</a></p>
+                <p><strong>📞 Liên hệ:</strong> <a href="tel:0901234567" class="text-primary font-bold">090 123 4567</a></p>
             </div>
         </div>
         <div class="modal-footer flex-end">
@@ -190,46 +191,15 @@
                 <h5 class="policy-title">1. GIÁ THUÊ & PHỤ PHÍ CUỐI TUẦN</h5>
                 <ul class="policy-list">
                     <li>Giá thuê tính theo ngày (24 giờ kể từ khi nhận xe).</li>
-                    <li><strong>Phụ phí:</strong> Áp dụng <b>+20%</b> cho tất cả đơn thuê vào Thứ 7 và Chủ nhật.</li>
-                    <li><strong>Trả xe trễ:</strong> Dưới 1h miễn phí; 1-3h phụ thu 200k; Trên 3h tính thêm 1 ngày.</li>
+                    <li><strong>Phụ phí:</strong> Áp dụng <b>+20%</b> cho đơn thuê vào Thứ 7 & CN.</li>
+                    <li><strong>Trả xe trễ:</strong> Dưới 1h miễn phí; 1-3h phụ thu 200k; Trên 3h tính 1 ngày.</li>
                 </ul>
-
                 <h5 class="policy-title">2. NHIÊN LIỆU</h5>
-                <ul class="policy-list">
-                    <li>Khách tự túc chi phí xăng/điện. Trả xe với mức nhiên liệu như lúc nhận.</li>
-                </ul>
-
-                <h5 class="policy-title">3. QUÃNG ĐƯỜNG & PHẠM VI</h5>
-                <ul class="policy-list">
-                    <li>Không giới hạn km. Vui lòng báo trước nếu đi ngoài tỉnh.</li>
-                    <li>❌ <b>Cấm:</b> Đưa xe ra khỏi biên giới Việt Nam.</li>
-                </ul>
-
-                <h5 class="policy-title">4. TIỀN CỌC & GIẤY TỜ</h5>
-                <ul class="policy-list">
-                    <li>CCCD gắn chip (bản gốc) + GPLX hợp lệ.</li>
-                    <li>Tiền cọc: 3-5 triệu (Xe máy), 15-30 triệu (Ô tô).</li>
-                </ul>
-
-                <h5 class="policy-title">5. ĐIỀU KIỆN THUÊ XE</h5>
-                <ul class="policy-list">
-                    <li>Độ tuổi: Từ 18 (xe máy), 23 (ô tô). Kinh nghiệm lái tối thiểu 1 năm.</li>
-                </ul>
-
-                <h5 class="policy-title">6. BẢO HIỂM & TRÁCH NHIỆM</h5>
-                <ul class="policy-list">
-                    <li>Khách hàng chịu chi phí sửa chữa thực tế nếu xảy ra va quẹt.</li>
-                </ul>
-
-                <h5 class="policy-title" style="color: #dc3545">7. CẤM NGHIÊM 🚫</h5>
-                <ul class="policy-list" style="color: #dc3545">
-                    <li>Sử dụng xe vào mục đích phi pháp, đua xe hoặc cầm cố xe.</li>
-                </ul>
-
-                <h5 class="policy-title">8. HOÀN HỦY</h5>
-                <ul class="policy-list">
-                    <li>Hủy trước 24h hoàn 100% cọc. Dưới 12h không hoàn cọc.</li>
-                </ul>
+                <ul class="policy-list"><li>Trả xe với mức nhiên liệu như lúc nhận.</li></ul>
+                <h5 class="policy-title">3. TIỀN CỌC & GIẤY TỜ</h5>
+                <ul class="policy-list"><li>CCCD gắn chip + GPLX bản gốc. Tiền cọc: 3-30 triệu tùy xe.</li></ul>
+                <h5 class="policy-title" style="color: #dc3545">4. CẤM NGHIÊM 🚫</h5>
+                <ul class="policy-list" style="color: #dc3545"><li>Không sử dụng xe vào mục đích phi pháp hoặc đua xe.</li></ul>
             </div>
         </div>
         <div class="modal-footer"><button class="btn-cancel !bg-slate-900 w-full font-bold py-3" onclick="closeTermsModal()">ĐÃ HIỂU & ĐỒNG Ý</button></div>
@@ -243,7 +213,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-<script src="{% static 'vehicles/js/map_logic.js' %}"></script>
+
+<script src="{% static 'frontend/js/map_logic.js' %}"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
