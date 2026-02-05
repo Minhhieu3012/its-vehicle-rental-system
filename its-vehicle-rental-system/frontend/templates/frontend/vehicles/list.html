@@ -29,8 +29,8 @@
                 <select name="sort"
                         class="px-4 py-2 bg-white border rounded-lg text-sm">
                     <option value="">Sắp xếp</option>
-                    <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>Giá ↑</option>
-                    <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>Giá ↓</option>
+                    <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>Giá tăng dần</option>
+                    <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>Giá giảm dần</option>
                 </select>
 
                 <button type="submit"
