@@ -43,8 +43,15 @@ def create_booking(request):
     if e < s:
         return JsonResponse({"detail": "end_date phải >= start_date"}, status=400)
 
-    if getattr(vehicle, "status", "") != "available":
-        return JsonResponse({"detail": "Xe không sẵn sàng"}, status=400)
+    # SỬA: Cho phép đặt xe nếu trạng thái là 'available' HOẶC nếu đặt cho tương lai (status khác nhưng không trùng lịch)
+    # Chúng ta bỏ qua check status cứng nhắc này, vì hàm is_overlapping bên dưới sẽ lo việc kiểm tra trùng lịch.
+    
+    # if getattr(vehicle, "status", "") != "available":
+    #    return JsonResponse({"detail": "Xe không sẵn sàng"}, status=400)
+    
+    # Thay vào đó, chỉ chặn nếu xe đang 'maintenance' (Bảo trì) vì bảo trì thường không biết ngày xong
+    if str(getattr(vehicle, "status", "")).lower() in ["maintenance", "bao tri"]:
+         return JsonResponse({"detail": "Xe đang bảo trì, không thể đặt lúc này"}, status=400)
 
     if is_overlapping(vehicle, s, e):
         return JsonResponse({"detail": "Xe bị trùng lịch"}, status=400)
