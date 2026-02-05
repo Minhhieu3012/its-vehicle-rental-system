@@ -43,10 +43,35 @@
         </div>
       </div>
 
-      <div class="rounded-xl overflow-hidden shadow-sm aspect-video relative group">
-        <div class="w-full h-full bg-cover bg-center" style='background-image: url("{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static "frontend/img/placeholder.jpg" %}{% endif %}");'>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+            <!-- Gallery ảnh xe -->
+      <div class="space-y-3">
+        <!-- Ảnh chính -->
+        <div id="main-image" class="rounded-xl overflow-hidden shadow-sm aspect-video relative group cursor-pointer">
+          <div id="main-img-bg" class="w-full h-full bg-cover bg-center transition-all duration-300" style='background-image: url("{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static "frontend/img/placeholder.jpg" %}{% endif %}");'>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+          </div>
         </div>
+        
+        <!-- Thumbnails -->
+        {% if vehicle.images.all %}
+        <div class="flex gap-2 overflow-x-auto pb-2">
+          <!-- Ảnh chính làm thumbnail đầu tiên -->
+          {% if vehicle.image %}
+          <div class="thumbnail flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden cursor-pointer border-2 border-primary" 
+               onclick="changeMainImage('{{ vehicle.image.url }}', this)">
+            <div class="w-full h-full bg-cover bg-center" style="background-image: url('{{ vehicle.image.url }}');"></div>
+          </div>
+          {% endif %}
+          
+          <!-- Các ảnh phụ từ VehicleImage -->
+          {% for img in vehicle.images.all %}
+          <div class="thumbnail flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent     hover:border-primary/50" 
+               onclick="changeMainImage('{{ img.image.url }}', this)">
+            <div class="w-full h-full bg-cover bg-center" style="background-image: url('{{ img.image.url }}');"></div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
 
       <hr class="border-slate-200 dark:border-slate-800" />
@@ -84,6 +109,57 @@
         <div class="prose prose-slate dark:prose-invert text-slate-600 dark:text-slate-300 leading-relaxed">
           <p>{{ vehicle.description|default:"Xe chất lượng cao, phù hợp cho mọi chuyến đi." }}</p>
         </div>
+      </section>
+
+      <!-- Section Đánh giá -->
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Đánh giá</h3>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ avg_rating }}</span>
+            <div class="flex">
+              {% for i in "12345" %}
+                {% if forloop.counter <= avg_rating %}
+                  <span class="text-yellow-400 text-xl">&#9733;</span>
+                {% else %}
+                  <span class="text-slate-300 text-xl">&#9733;</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <span class="text-slate-500 text-sm">({{ review_count }} đánh giá)</span>
+          </div>
+        </div>
+
+        {% if reviews %}
+        <div class="space-y-4">
+          {% for review in reviews %}
+          <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <p class="font-bold text-slate-900 dark:text-white">{{ review.user.username }}</p>
+                <p class="text-xs text-slate-500">{{ review.created_at|date:"d/m/Y" }}</p>
+              </div>
+              <div class="flex">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= review.rating %}
+                    <span class="text-yellow-400">&#9733;</span>
+                  {% else %}
+                    <span class="text-slate-300">&#9733;</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% if review.comment %}
+            <p class="text-slate-600 dark:text-slate-300 text-sm">{{ review.comment }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-slate-500">
+          <p>Chưa có đánh giá nào cho xe này.</p>
+        </div>
+        {% endif %}
       </section>
     </div>
 
@@ -205,6 +281,22 @@
       }
     }
   });
+
+    // Hàm đổi ảnh chính khi click vào thumbnail
+  function changeMainImage(imageUrl, clickedThumb) {
+    // Cập nhật ảnh chính
+    const mainImgBg = document.getElementById('main-img-bg');
+    mainImgBg.style.backgroundImage = `url('${imageUrl}')`;
+    
+    // Cập nhật border cho thumbnails
+    const allThumbs = document.querySelectorAll('.thumbnail');
+    allThumbs.forEach(thumb => {
+      thumb.classList.remove('border-primary');
+      thumb.classList.add('border-transparent');
+    });
+    clickedThumb.classList.remove('border-transparent');
+    clickedThumb.classList.add('border-primary');
+  }
 </script>
 
 {% endblock %}

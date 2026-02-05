@@ -87,7 +87,11 @@
                             {% if booking.status == 'approved' %}
                             <a href="{% url 'frontend:booking_return' booking.id %}" class="bg-primary text-white px-3 py-1.5 rounded-lg text-sm hover:bg-opacity-90 transition">Trả xe</a>
                             {% elif booking.status == 'completed' %}
-                            <a href="{% url 'frontend:review_form' booking.id %}" class="border px-3 py-1.5 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition">Đánh giá</a>
+                                {% if booking.vehicle.id in reviewed_vehicle_ids %}
+                                <span class="text-green-600 text-sm font-medium">Đã đánh giá</span>
+                                {% else %}
+                                <a href="{% url 'frontend:review_form' booking.id %}" class="border px-3 py-1.5 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition">Đánh giá</a>
+                                {% endif %}
                             {% else %}
                             <span class="text-slate-400 italic text-xs">N/A</span>
                             {% endif %}

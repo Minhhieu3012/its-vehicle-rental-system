@@ -103,8 +103,24 @@ def vehicle_list(request):
 
 
 def vehicle_detail(request, vehicle_id):
+    from reviews.models import Review
+    from django.db.models import Avg
     vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
-    return render(request, 'frontend/vehicles/detail.html', {'vehicle': vehicle})
+    # Lấy danh sách đánh giá của xe này
+    reviews = Review.objects.filter(vehicle=vehicle).order_by('-created_at')
+    
+    # Tính rating trung bình
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+    avg_rating = round(avg_rating, 1) if avg_rating else 0
+    
+    review_count = reviews.count()
+    
+    return render(request, 'frontend/vehicles/detail.html', {
+        'vehicle': vehicle,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'review_count': review_count,
+    })
 
 # ==========================================
 # 2. USER OPERATIONS (DÀNH CHO NGƯỜI THUÊ)
@@ -177,6 +193,7 @@ def vehicle_payment(request, vehicle_id):
 
 @login_required(login_url='frontend:login')
 def order_list(request):
+    from reviews.models import Review
     if not Booking:
         return render(request, 'frontend/bookings/my_list.html', {'bookings': []})
     try:
@@ -189,16 +206,20 @@ def order_list(request):
         if search_query:
             bookings_qs = bookings_qs.filter(Q(vehicle__name__icontains=search_query) | Q(vehicle__license_plate__icontains=search_query))
 
+        # Lấy danh sách vehicle_id đã được user đánh giá
+        reviewed_vehicle_ids = list(Review.objects.filter(user=request.user).values_list('vehicle_id', flat=True))
+
         all_user_bookings = Booking.objects.filter(customer=request.user)
         context = {
             'bookings': bookings_qs,
+            'reviewed_vehicle_ids': reviewed_vehicle_ids,
             'active_count': all_user_bookings.filter(status='approved').count(),
             'completed_count': all_user_bookings.filter(status='completed').count(),
             'pending_count': all_user_bookings.filter(status='pending').count(),
         }
     except Exception as e:
         messages.error(request, f"Lỗi hiển thị danh sách: {str(e)}")
-        context = {'bookings': [], 'active_count': 0, 'completed_count': 0, 'pending_count': 0}
+        context = {'bookings': [], 'reviewed_vehicle_ids': [], 'active_count': 0, 'completed_count': 0, 'pending_count': 0}
     return render(request, 'frontend/bookings/my_list.html', context)
 
 @login_required(login_url='frontend:login')
@@ -215,12 +236,22 @@ def booking_return(request, booking_id):
 
 @login_required(login_url='frontend:login')
 def review_form(request, booking_id):
+    from reviews.models import Review
     booking = get_object_or_404(Booking, pk=booking_id, customer=request.user)
+    # Kiểm tra đã đánh giá chưa
+    existing_review = Review.objects.filter(user=request.user, vehicle=booking.vehicle).first()
+    if existing_review:
+        messages.info(request, "Bạn đã đánh giá xe này rồi!")
+        return redirect('/my-orders/')
+    
+    # Chỉ cho phép đánh giá khi booking đã hoàn thành
+    if booking.status != 'completed':
+        messages.error(request, "Chỉ có thể đánh giá sau khi hoàn thành chuyến đi!")
+        return redirect('/my-orders/')
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
-            review.booking = booking
             review.user = request.user
             review.vehicle = booking.vehicle
             review.save()
