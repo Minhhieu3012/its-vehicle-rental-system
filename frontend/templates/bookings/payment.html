@@ -1,4 +1,4 @@
-﻿{% extends 'frontend/base.html' %} {% load static %} {% block title %}Thanh toán
+﻿{% extends 'base.html' %} {% load static %} {% block title %}Thanh toán
 - ITS Rental{% endblock %} {% block content %}
 <div class="relative w-full min-h-[calc(100vh-64px)] overflow-x-hidden">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
@@ -234,7 +234,7 @@
               >
                 <div
                   class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                  style="background-image: url('{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}');"
+                  style="background-image: url('{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}');"
                 ></div>
               </div>
 

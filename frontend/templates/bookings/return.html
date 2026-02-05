@@ -1,4 +1,4 @@
-﻿{% extends 'frontend/base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Trả xe - ITS Rental{% endblock %}
@@ -187,7 +187,7 @@
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div class="h-40 w-full relative">
                     <img class="w-full h-full object-cover"
-                         src="{% if booking.vehicle.image %}{{ booking.vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}"
+                         src="{% if booking.vehicle.image %}{{ booking.vehicle.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}"
                          alt="{{ booking.vehicle.name }}">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                         <h3 class="text-white font-bold text-lg">{{ booking.vehicle.name }}</h3>

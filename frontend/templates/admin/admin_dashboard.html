@@ -1,4 +1,4 @@
-﻿{% extends 'frontend/base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Bảng điều khiển Admin - ITS Rental{% endblock %}
 
@@ -34,11 +34,11 @@
         <h1 class="text-3xl font-black text-slate-900 mb-8 tracking-tight">Tổng quan hệ thống</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            {% include 'frontend/admin/includes/_stats_cards.html' %}
+            {% include 'admin/includes/_stats_cards.html' %}
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            {% include 'frontend/admin/includes/_recent_activities.html' %}
+            {% include 'admin/includes/_recent_activities.html' %}
         </div>
     </main>
 </div>

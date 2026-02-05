@@ -1,4 +1,4 @@
-﻿{% extends 'frontend/base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Danh sách xe - ITS Rental{% endblock %}
@@ -52,7 +52,7 @@
                 <div class="flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full">
 
                     <div class="relative w-full aspect-video bg-gray-100 overflow-hidden">
-                        <img src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}"
+                        <img src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}"
                              alt="{{ vehicle.name }}"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
 

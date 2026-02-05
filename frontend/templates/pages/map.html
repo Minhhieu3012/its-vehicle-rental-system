@@ -1,4 +1,4 @@
-{% extends 'frontend/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Bản đồ thông minh - ITS Rental{% endblock %}
@@ -117,7 +117,7 @@
                          onclick="focusVehicle({{ vehicle.latitude }}, {{ vehicle.longitude }})">
                         <div class="flex gap-4">
                             <div class="w-28 h-20 bg-gray-100 rounded-md overflow-hidden relative shrink-0">
-                                <img class="w-full h-full object-cover" src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}" alt="{{ vehicle.name }}" />
+                                <img class="w-full h-full object-cover" src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}" alt="{{ vehicle.name }}" />
                                 {% if vehicle.status|upper != 'AVAILABLE' %}
                                 <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
                                     <span class="text-[10px] text-white font-bold uppercase bg-red-600 px-2 py-0.5 rounded">Đã thuê</span>

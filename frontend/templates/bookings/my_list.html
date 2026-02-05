@@ -1,4 +1,4 @@
-﻿{% extends 'frontend/base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Đơn đặt xe của tôi - ITS Rental{% endblock %}
@@ -60,7 +60,7 @@
                     <tr>
                         <td class="p-4 flex items-center gap-3">
                             <div class="h-10 w-14 rounded bg-cover bg-center bg-slate-200 flex items-center justify-center overflow-hidden"
-                                 style="background-image: url('{% if booking.vehicle.image %}{{ booking.vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}');">
+                                 style="background-image: url('{% if booking.vehicle.image %}{{ booking.vehicle.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}');">
                                 {% if not booking.vehicle.image %}
                                 <span class="material-symbols-outlined text-slate-400 text-sm">image_not_supported</span>
                                 {% endif %}

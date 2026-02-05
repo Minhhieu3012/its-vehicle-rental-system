@@ -47,11 +47,11 @@ def home(request):
     if vehicle_type and vehicles: 
         vehicles = vehicles.filter(vehicle_type=vehicle_type) 
 
-    return render(request, 'frontend/pages/home.html', {'featured_vehicles': vehicles})
+    return render(request, 'pages/home.html', {'featured_vehicles': vehicles})
 
 def map_view(request):
     if not Vehicle:
-        return render(request, 'frontend/pages/map.html', {'vehicles': [], 'vehicles_json': []})
+        return render(request, 'pages/map.html', {'vehicles': [], 'vehicles_json': []})
 
     vehicles = Vehicle.objects.exclude(Q(latitude__isnull=True) | Q(longitude__isnull=True))
     vehicles_json = []
@@ -67,14 +67,14 @@ def map_view(request):
             'lng': float(lng),
             'status': getattr(v, 'status', 'Available'),
             'status_display': v.get_status_display() if hasattr(v, 'get_status_display') else str(v.status),
-            'image_url': v.image.url if v.image else '/static/frontend/img/placeholder.jpg',
+            'image_url': v.image.url if v.image else '/static/img/placeholder.jpg',
             'detail_url': reverse('frontend:vehicle_detail', args=[v.id]),
             'price': float(getattr(v, 'price_per_day', 0) or getattr(v, 'daily_rate', 0)),
             'rating': 4.8, 
             'trips': 12 
         })
 
-    return render(request, 'frontend/pages/map.html', {
+    return render(request, 'pages/map.html', {
         'vehicles': vehicles, 
         'vehicles_json': vehicles_json
     })
@@ -99,7 +99,7 @@ def vehicle_list(request):
     context = {
         'vehicles': vehicles
     }
-    return render(request, 'frontend/vehicles/list.html', context)
+    return render(request, 'vehicles/list.html', context)
 
 
 def vehicle_detail(request, vehicle_id):
@@ -115,7 +115,7 @@ def vehicle_detail(request, vehicle_id):
     
     review_count = reviews.count()
     
-    return render(request, 'frontend/vehicles/detail.html', {
+    return render(request, 'vehicles/detail.html', {
         'vehicle': vehicle,
         'reviews': reviews,
         'avg_rating': avg_rating,
@@ -177,7 +177,7 @@ def vehicle_payment(request, vehicle_id):
             messages.error(request, f"Lỗi hệ thống: {str(e)}")
             return redirect(f'/thue-xe/{vehicle_id}/')
 
-    return render(request, 'frontend/bookings/payment.html', {
+    return render(request, 'bookings/payment.html', {
         'vehicle': vehicle,
         'pickup_date': p_date,
         'return_date': r_date,
@@ -195,7 +195,7 @@ def vehicle_payment(request, vehicle_id):
 def order_list(request):
     from reviews.models import Review
     if not Booking:
-        return render(request, 'frontend/bookings/my_list.html', {'bookings': []})
+        return render(request, 'bookings/my_list.html', {'bookings': []})
     try:
         bookings_qs = Booking.objects.filter(customer=request.user).order_by('-id')
         status_filter = request.GET.get('status')
@@ -220,7 +220,7 @@ def order_list(request):
     except Exception as e:
         messages.error(request, f"Lỗi hiển thị danh sách: {str(e)}")
         context = {'bookings': [], 'reviewed_vehicle_ids': [], 'active_count': 0, 'completed_count': 0, 'pending_count': 0}
-    return render(request, 'frontend/bookings/my_list.html', context)
+    return render(request, 'bookings/my_list.html', context)
 
 @login_required(login_url='frontend:login')
 def booking_return(request, booking_id):
@@ -232,7 +232,7 @@ def booking_return(request, booking_id):
         booking.save()
         messages.success(request, "Trả xe thành công!")
         return redirect('/my-orders/')
-    return render(request, 'frontend/bookings/return.html', {'booking': booking})
+    return render(request, 'bookings/return.html', {'booking': booking})
 
 @login_required(login_url='frontend:login')
 def review_form(request, booking_id):
@@ -261,7 +261,7 @@ def review_form(request, booking_id):
             messages.error(request, "Vui lòng kiểm tra lại thông tin đánh giá.")
     else:
         form = ReviewForm()
-    return render(request, 'frontend/reviews/form.html', {'booking': booking, 'form': form})
+    return render(request, 'reviews/form.html', {'booking': booking, 'form': form})
 
 # ==========================================
 # 3. ADMIN OPERATIONS (DÀNH CHO QUẢN TRỊ)
@@ -282,12 +282,12 @@ def admin_dashboard(request):
         'recent_activities': recent_activities,
         'vehicles': vehicles,
     }
-    return render(request, 'frontend/admin/dashboard.html', context)
+    return render(request, 'admin/dashboard.html', context)
 
 @user_passes_test(is_admin)
 def admin_vehicle_list(request):
     vehicles = Vehicle.objects.all().order_by('-id')
-    return render(request, 'frontend/admin/vehicles.html', {'vehicles': vehicles})
+    return render(request, 'admin/vehicles.html', {'vehicles': vehicles})
 
 @user_passes_test(is_admin)
 def admin_vehicle_create(request):
@@ -301,12 +301,12 @@ def admin_vehicle_create(request):
             messages.error(request, "Vui lòng kiểm tra lại các trường dữ liệu nhập vào.")
     else:
         form = VehicleForm()
-    return render(request, 'frontend/admin/vehicle_form.html', {'form': form, 'title': 'Thêm xe mới'})
+    return render(request, 'admin/vehicle_form.html', {'form': form, 'title': 'Thêm xe mới'})
 
 @user_passes_test(is_admin)
 def admin_booking_list(request):
     bookings = Booking.objects.all().order_by('-created_at')
-    return render(request, 'frontend/admin/bookings.html', {'bookings': bookings})
+    return render(request, 'admin/bookings.html', {'bookings': bookings})
 
 @user_passes_test(is_admin)
 def admin_stats(request):
@@ -326,7 +326,7 @@ def admin_stats(request):
         'total_cancelled': total_cancelled,
         'revenue_list': revenue_list,
     }
-    return render(request, 'frontend/admin/analytics.html', context)
+    return render(request, 'admin/analytics.html', context)
 
 # --- TÁC VỤ QUẢN TRỊ NHANH ---
 
@@ -380,7 +380,7 @@ def login_view(request):
             messages.error(request, "Tên đăng nhập hoặc mật khẩu không đúng.")
     else:
         form = UserLoginForm()
-    return render(request, 'frontend/auth/login.html', {'form': form})
+    return render(request, 'auth/login.html', {'form': form})
 
 def register_view(request):
     if request.method == 'POST':
@@ -396,7 +396,7 @@ def register_view(request):
                 messages.error(request, f"Lỗi đăng ký: {e}")
     else:
         form = RegistrationForm()
-    return render(request, 'frontend/auth/register.html', {'form': form})
+    return render(request, 'auth/register.html', {'form': form})
 
 def logout_view(request):
     logout(request)

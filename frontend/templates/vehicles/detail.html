@@ -1,4 +1,4 @@
-﻿{% extends 'frontend/base.html' %} 
+﻿{% extends 'base.html' %} 
 {% load static %} 
 
 {% block title %}{{ vehicle.name }} - ITS Rental{% endblock %} 
@@ -47,7 +47,7 @@
       <div class="space-y-3">
         <!-- Ảnh chính -->
         <div id="main-image" class="rounded-xl overflow-hidden shadow-sm aspect-video relative group cursor-pointer">
-          <div id="main-img-bg" class="w-full h-full bg-cover bg-center transition-all duration-300" style='background-image: url("{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static "frontend/img/placeholder.jpg" %}{% endif %}");'>
+          <div id="main-img-bg" class="w-full h-full bg-cover bg-center transition-all duration-300" style='background-image: url("{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static "img/placeholder.jpg" %}{% endif %}");'>
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
           </div>
         </div>
