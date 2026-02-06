@@ -106,10 +106,8 @@ def vehicle_detail(request, vehicle_id):
     from reviews.models import Review
     from django.db.models import Avg
     vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
-    # Lấy danh sách đánh giá của xe này
     reviews = Review.objects.filter(vehicle=vehicle).order_by('-created_at')
     
-    # Tính rating trung bình
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
     avg_rating = round(avg_rating, 1) if avg_rating else 0
     
@@ -140,7 +138,6 @@ def vehicle_payment(request, vehicle_id):
         p_date = datetime.now().date()
         r_date = p_date + timedelta(days=1) 
 
-    # --- LOGIC TÍNH TOÁN CHI TIẾT PHỤ PHÍ CUỐI TUẦN 20% ---
     weekday_count = 0
     weekend_count = 0
     daily_rate = float(getattr(vehicle, 'price_per_day', 0) or getattr(vehicle, 'daily_rate', 0))
@@ -206,7 +203,6 @@ def order_list(request):
         if search_query:
             bookings_qs = bookings_qs.filter(Q(vehicle__name__icontains=search_query) | Q(vehicle__license_plate__icontains=search_query))
 
-        # Lấy danh sách vehicle_id đã được user đánh giá
         reviewed_vehicle_ids = list(Review.objects.filter(user=request.user).values_list('vehicle_id', flat=True))
 
         all_user_bookings = Booking.objects.filter(customer=request.user)
@@ -238,13 +234,11 @@ def booking_return(request, booking_id):
 def review_form(request, booking_id):
     from reviews.models import Review
     booking = get_object_or_404(Booking, pk=booking_id, customer=request.user)
-    # Kiểm tra đã đánh giá chưa
     existing_review = Review.objects.filter(user=request.user, vehicle=booking.vehicle).first()
     if existing_review:
         messages.info(request, "Bạn đã đánh giá xe này rồi!")
         return redirect('/my-orders/')
     
-    # Chỉ cho phép đánh giá khi booking đã hoàn thành
     if booking.status != 'completed':
         messages.error(request, "Chỉ có thể đánh giá sau khi hoàn thành chuyến đi!")
         return redirect('/my-orders/')
@@ -302,6 +296,19 @@ def admin_vehicle_create(request):
     else:
         form = VehicleForm()
     return render(request, 'admin/vehicle_form.html', {'form': form, 'title': 'Thêm xe mới'})
+
+# --- HÀM XÓA XE NHANH QUA AJAX (MỚI THÊM) ---
+@user_passes_test(is_admin)
+def admin_vehicle_delete(request, vehicle_id):
+    if request.method == 'POST':
+        try:
+            vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+            vehicle_name = vehicle.name
+            vehicle.delete()
+            return JsonResponse({'status': 'success', 'message': f'Đã xóa xe {vehicle_name}!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Yêu cầu không hợp lệ'}, status=405)
 
 @user_passes_test(is_admin)
 def admin_booking_list(request):

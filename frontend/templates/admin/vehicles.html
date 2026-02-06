@@ -22,6 +22,8 @@
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
+
 <div class="flex min-h-[calc(100vh-68px)]">
     <aside class="w-64 hidden lg:block bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-4">
         <nav class="space-y-1">
@@ -66,7 +68,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                         {% for vehicle in vehicles %}
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-300">
                             <td class="px-6 py-4 text-slate-500 font-medium">#{{ vehicle.id }}</td>
                             <td class="px-6 py-4">
                                 <div class="font-bold text-slate-900 dark:text-white">{{ vehicle.name }}</div>
@@ -77,8 +79,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
-                                    {% if vehicle.status == 'available' %}bg-green-100 text-green-700
-                                    {% elif vehicle.status == 'booked' %}bg-yellow-100 text-yellow-700
+                                    {% if vehicle.status|lower == 'available' %}bg-green-100 text-green-700
+                                    {% elif vehicle.status|lower == 'booked' %}bg-yellow-100 text-yellow-700
                                     {% else %}bg-red-100 text-red-700{% endif %}">
                                     {{ vehicle.get_status_display }}
                                 </span>
@@ -97,9 +99,13 @@
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
                                     </a>
 
-                                    <a href="/admin/vehicles/vehicle/{{ vehicle.id }}/delete/" class="text-slate-400 hover:text-red-600 transition-colors" title="Xóa">
+                                    <button type="button"
+                                            class="delete-vehicle-btn text-slate-400 hover:text-red-600 transition-colors"
+                                            data-id="{{ vehicle.id }}"
+                                            data-name="{{ vehicle.name }}"
+                                            title="Xóa">
                                         <span class="material-symbols-outlined text-[20px]">delete</span>
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -117,4 +123,43 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.delete-vehicle-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const vehicleId = this.dataset.id;
+            const vehicleName = this.dataset.name;
+            const row = this.closest('tr');
+
+            if (confirm(`Bạn có chắc chắn muốn xóa xe "${vehicleName}" không?`)) {
+                // Lấy token bảo mật từ Django
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch(`/dashboard/vehicles/delete/${vehicleId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Hiệu ứng xóa dòng mượt mà trên UI
+                            row.style.transition = 'all 0.5s ease';
+                            row.style.opacity = '0';
+                            row.style.transform = 'translateX(20px)';
+                            setTimeout(() => row.remove(), 500);
+                        } else {
+                            alert('Lỗi: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi gửi yêu cầu xóa.');
+                    });
+            }
+        });
+    });
+</script>
 {% endblock %}
