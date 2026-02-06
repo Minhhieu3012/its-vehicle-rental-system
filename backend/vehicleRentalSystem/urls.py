@@ -15,7 +15,7 @@ urlpatterns = [
     path('bookings/', include('bookings.urls')),
     
     # 4. App Reviews (Nếu có endpoint riêng)
-    path('reviews/', include('reviews.urls')),
+    # path('reviews/', include('reviews.urls')),
 
     # 5. App Frontend (Giao diện chính - Trang chủ, Login, Register)
     path('', include(('frontend.urls', 'frontend'), namespace='frontend')),
