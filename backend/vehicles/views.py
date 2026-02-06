@@ -10,6 +10,7 @@ import json
 import random 
 
 from .models import Vehicle, VehicleImage
+from bookings.models import Booking
 from .forms import ReviewForm, VehicleImageForm
 from reviews.models import Review
 
@@ -179,6 +180,18 @@ def map_view(request):
 def add_review(request, vehicle_pk):
     """API: Thêm hoặc cập nhật đánh giá"""
     vehicle = get_object_or_404(Vehicle, pk=vehicle_pk)
+
+    # Kiểm tra user đã có booking completed cho xe này chưa
+    has_completed_booking = Booking.objects.filter(
+        customer=request.user,
+        vehicle=vehicle,
+        status='completed'
+    ).exists()
+    if not has_completed_booking:
+        return JsonResponse(
+            {'success': False, 'message': 'Bạn cần hoàn thành chuyến đi trước khi đánh giá.'},
+            status=403
+        )
     existing_review = Review.objects.filter(vehicle=vehicle, user=request.user).first()
     
     if request.method == 'POST':
