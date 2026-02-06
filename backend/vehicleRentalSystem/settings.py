@@ -1,17 +1,16 @@
-"""
-Django settings for vehicleRentalSystem project.
-Bản sửa lỗi: Khớp cấu trúc thư mục lồng nhau thực tế.
-"""
-
 from pathlib import Path
 import os
+import dj_database_url
 
 # 1. Định nghĩa thư mục gốc (Trỏ đến thư mục chứa manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2. Cấu hình Bảo mật
 SECRET_KEY = 'django-insecure-^u30-jmlkmxhizxcva5*vy56kj)3beu^n%e%u!z8yfr60tv*ae'
-DEBUG = True
+
+# Trên Render, DEBUG sẽ là False (an toàn). Ở nhà, nó là True (để sửa lỗi).
+DEBUG = 'RENDER' not in os.environ
+
 ALLOWED_HOSTS = ['*'] # Cho phép truy cập từ mọi host trong Docker
 
 # 3. Đăng ký các ứng dụng
@@ -33,6 +32,7 @@ INSTALLED_APPS = [
 # 4. Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,6 +74,10 @@ DATABASES = {
     }
 }
 
+# Nếu có biến DATABASE_URL (tức là đang ở trên Render), nó sẽ ghi đè cấu hình trên
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
+
 # 8. Ngôn ngữ và Thời gian
 LANGUAGE_CODE = 'vi'
 TIME_ZONE = 'Asia/Ho_Chi_Minh'
@@ -86,6 +90,9 @@ STATICFILES_DIRS = [
     BASE_DIR / "frontend" / "static", # Khớp với image_1ab828.png
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Cấu hình nén file tĩnh cho WhiteNoise (Giúp web tải nhanh hơn)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # 10. Media files
 MEDIA_URL = '/media/'
