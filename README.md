@@ -55,14 +55,14 @@ The system not only manages vehicle rentals but also optimizes operations throug
 
 ---
 
-## 🚀 Installation Guide
+## 🚀 Guide
 
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/Minhhieu3012/its-vehicle-rental-system.git
 cd vehicle-rental-its
 ```
-### 2. Build & Run
+### 2. Build & Run (Local)
 
 ```bash
 docker-compose up -d --build
