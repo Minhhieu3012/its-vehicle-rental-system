@@ -1,9 +1,13 @@
 from pathlib import Path
 import os
+import sys
 import dj_database_url
 
-# 1. Định nghĩa thư mục gốc (Trỏ đến thư mục chứa manage.py)
+# Định nghĩa thư mục gốc (Trỏ đến thư mục chứa manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# <--- 1. THÊM DÒNG QUAN TRỌNG NÀY VÀO ĐÂY:
+sys.path.append(str(BASE_DIR))
 
 # 2. Cấu hình Bảo mật
 SECRET_KEY = 'django-insecure-^u30-jmlkmxhizxcva5*vy56kj)3beu^n%e%u!z8yfr60tv*ae'
