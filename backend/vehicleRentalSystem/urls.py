@@ -1,6 +1,6 @@
 """
 URL configuration for vehicleRentalSystem project.
-FILE ĐÃ MERGE: Kết nối Admin, Map, Booking và Frontend.
+FILE ĐÃ MERGE: Kết nối Admin, Map, Booking, Frontend và Media Static.
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -17,7 +17,7 @@ urlpatterns = [
     # 3. App Bookings (Đặt xe & Thanh toán)
     path('bookings/', include('bookings.urls')),
     
-    # 4. App Reviews (Đánh giá - Lấy từ nhánh Dev nếu cần endpoint riêng, thường thì include trong vehicles)
+    # 4. App Reviews (Nếu có endpoint riêng)
     # path('reviews/', include('reviews.urls')),
 
     # 5. App Frontend (Giao diện chính - Trang chủ, Login, Register)
@@ -25,7 +25,9 @@ urlpatterns = [
     path('', include(('frontend.urls', 'frontend'), namespace='frontend')),
 ]
 
-# Cấu hình load ảnh (Media) khi chạy Local
+# Cấu hình load ảnh (Media) và file tĩnh (Static) khi chạy Local
 if settings.DEBUG:
+    # Cho phép truy cập ảnh xe qua URL /media/...
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Hỗ trợ load CSS/JS trong môi trường phát triển
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
