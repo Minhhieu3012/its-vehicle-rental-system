@@ -41,11 +41,14 @@ urlpatterns = [
     path('dashboard/bookings/', views.admin_booking_list, name='admin_bookings'),
     path('dashboard/stats/', views.admin_stats, name='admin_stats'),
 
-    # Chức năng Thêm & Xóa xe (Xóa dùng AJAX để không nhảy trang)
+    # CHỨC NĂNG QUẢN LÝ XE TÙY CHỈNH
     path('dashboard/vehicles/add/', views.admin_vehicle_create, name='admin_vehicle_add'),
+    # Link sửa xe dùng để nạp dữ liệu vào form tùy chỉnh
+    path('dashboard/vehicles/edit/<int:vehicle_id>/', views.admin_vehicle_edit, name='admin_vehicle_edit'),
+    # Link xóa xe xử lý qua AJAX
     path('dashboard/vehicles/delete/<int:vehicle_id>/', views.admin_vehicle_delete, name='admin_vehicle_delete'),
     
-    # Tác vụ quản trị nhanh
+    # TÁC VỤ QUẢN TRỊ NHANH
     path('dashboard/approve/<int:booking_id>/', views.approve_order, name='approve_order'),
     path('dashboard/vehicles/release/<int:vehicle_id>/', views.admin_release_vehicle, name='admin_release_vehicle'),
     path('dashboard/update-location/', views.update_vehicle_location, name='update_location'),

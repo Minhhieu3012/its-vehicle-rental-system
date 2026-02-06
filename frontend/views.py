@@ -297,7 +297,26 @@ def admin_vehicle_create(request):
         form = VehicleForm()
     return render(request, 'admin/vehicle_form.html', {'form': form, 'title': 'Thêm xe mới'})
 
-# --- HÀM XÓA XE NHANH QUA AJAX (MỚI THÊM) ---
+# --- HÀM SỬA XE TRỰC TIẾP TRÊN GIAO DIỆN ---
+@user_passes_test(is_admin)
+def admin_vehicle_edit(request, vehicle_id):
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+    if request.method == 'POST':
+        form = VehicleForm(request.POST, request.FILES, instance=vehicle)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Đã cập nhật thông tin xe {vehicle.name} thành công!")
+            return redirect('frontend:admin_vehicles')
+    else:
+        form = VehicleForm(instance=vehicle)
+    
+    return render(request, 'admin/vehicle_form.html', {
+        'form': form, 
+        'title': f'Chỉnh sửa: {vehicle.name}',
+        'vehicle': vehicle
+    })
+
+# --- HÀM XÓA XE NHANH QUA AJAX ---
 @user_passes_test(is_admin)
 def admin_vehicle_delete(request, vehicle_id):
     if request.method == 'POST':

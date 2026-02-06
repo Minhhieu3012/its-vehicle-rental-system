@@ -95,7 +95,7 @@
                                     </a>
                                     {% endif %}
 
-                                    <a href="/admin/vehicles/vehicle/{{ vehicle.id }}/change/" class="text-slate-400 hover:text-primary transition-colors" title="Sửa">
+                                    <a href="{% url 'frontend:admin_vehicle_edit' vehicle.id %}" class="text-slate-400 hover:text-primary transition-colors" title="Sửa">
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
                                     </a>
 
@@ -132,7 +132,7 @@
             const row = this.closest('tr');
 
             if (confirm(`Bạn có chắc chắn muốn xóa xe "${vehicleName}" không?`)) {
-                // Lấy token bảo mật từ Django
+                // Lấy token bảo mật từ input ẩn do Django sinh ra
                 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
                 fetch(`/dashboard/vehicles/delete/${vehicleId}/`, {
@@ -145,7 +145,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'success') {
-                            // Hiệu ứng xóa dòng mượt mà trên UI
+                            // Hiệu ứng xóa dòng trực quan
                             row.style.transition = 'all 0.5s ease';
                             row.style.opacity = '0';
                             row.style.transform = 'translateX(20px)';
