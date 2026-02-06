@@ -14,21 +14,20 @@ from bookings.models import Booking
 from .forms import ReviewForm, VehicleImageForm
 from reviews.models import Review
 
-# ============== 1. API LIST & DETAIL (GỘP CẢ 2 NHÁNH) ==============
+# ============== 1. API LIST & DETAIL ==============
 
 @require_GET
 def vehicle_list_api(request):
     """API: Lấy danh sách xe (Có lọc, phân trang VÀ tọa độ cho Map)"""
-    # Lấy QuerySet cơ bản
     vehicles = Vehicle.objects.annotate(
         avg_rating=Avg('reviews__rating'),
         review_count=Count('reviews')
     )
     
-    # --- LOGIC LỌC (Của nhánh HEAD) ---
+    # --- LOGIC LỌC ---
     availability = request.GET.get('availability')
     if availability == 'available':
-        vehicles = vehicles.filter(status='available') # Sửa lại cho khớp model mới
+        vehicles = vehicles.filter(status='available') 
     elif availability == 'unavailable':
         vehicles = vehicles.exclude(status='available')
     
@@ -56,7 +55,7 @@ def vehicle_list_api(request):
     paginator = Paginator(vehicles, 9)
     page_obj = paginator.get_page(page)
     
-    # --- TRẢ VỀ JSON (Bổ sung lat/lng của nhánh DEV) ---
+    # --- TRẢ VỀ JSON ---
     data = {
         'vehicles': [
             {
@@ -127,7 +126,7 @@ def vehicle_detail_api(request, pk):
     return JsonResponse(data)
 
 
-# ============== 2. MAP VIEW (CỦA NHÁNH DEV) ==============
+# ============== 2. MAP VIEW ==============
 
 def map_view(request):
     """
@@ -147,11 +146,10 @@ def map_view(request):
         if status_display == 'in_use':
             status_display = 'in operation'
             
-        # 1. Rating giả lập (Nếu chưa có review thì mặc định 5.0 cho đẹp)
+        # 1. Rating giả lập 
         rating_val = round(v.avg_rating, 1) if v.avg_rating else 5.0
         
-        # 2. Số lượt thuê giả lập (Nhân lên nhìn cho uy tín)
-        # Ví dụ: Có 1 review thì coi như đã có 15 khách thuê
+        # 2. Số lượt thuê giả lập 
         trips_val = v.review_count * 15 + random.randint(5, 50)
 
         vehicles_list.append({
@@ -174,7 +172,7 @@ def map_view(request):
     return render(request, 'vehicles/map.html', context)
 
 
-# ============== 3. API REVIEWS & UPLOAD (CỦA NHÁNH HEAD) ==============
+# ============== 3. API REVIEWS & UPLOAD ==============
 
 @login_required
 def add_review(request, vehicle_pk):
