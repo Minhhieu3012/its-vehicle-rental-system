@@ -128,6 +128,7 @@ def vehicle_detail(request, vehicle_id):
 def vehicle_payment(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
     
+    # Lấy thông tin ngày từ POST hoặc GET (hỗ trợ chuyển hướng từ Map)
     pickup_str = request.POST.get('pickup_date') or request.GET.get('pickup_date', '')
     return_str = request.POST.get('return_date') or request.GET.get('return_date', '')
     
@@ -138,9 +139,10 @@ def vehicle_payment(request, vehicle_id):
         p_date = datetime.now().date()
         r_date = p_date + timedelta(days=1) 
 
+    # --- LOGIC TÍNH TOÁN ĐỒNG BỘ VỚI UI (SURGE PRICING 20%) ---
     weekday_count = 0
     weekend_count = 0
-    daily_rate = float(getattr(vehicle, 'price_per_day', 0) or getattr(vehicle, 'daily_rate', 0))
+    daily_rate = float(vehicle.price_per_day)
     
     current_date = p_date
     while current_date < r_date:
@@ -151,11 +153,13 @@ def vehicle_payment(request, vehicle_id):
         current_date += timedelta(days=1)
 
     weekday_total = weekday_count * daily_rate
-    weekend_total = weekend_count * (daily_rate * 1.2)
+    weekend_rate = daily_rate * 1.2
+    weekend_total = weekend_count * weekend_rate
     base_total = weekday_total + weekend_total
-    tax_fee = base_total * 0.1 # Thuế & phí 10%
+    tax_fee = base_total * 0.1
     final_total = base_total + tax_fee
 
+    # Xử lý xác nhận thanh toán
     if request.method == 'POST' and 'payment_method' in request.POST:
         try:
             Booking.objects.create(
@@ -180,10 +184,10 @@ def vehicle_payment(request, vehicle_id):
         'return_date': r_date,
         'days': weekday_count + weekend_count,
         'weekday_count': weekday_count,
-        'weekend_count': weekend_count,
+        'weekend_count': weekend_count, # Đảm bảo biến này được truyền để UI hiển thị số ngày cuối tuần
         'weekday_total': weekday_total,
         'weekend_total': weekend_total,
-        'weekend_rate': daily_rate * 1.2,
+        'weekend_rate': weekend_rate,
         'tax_fee': tax_fee,
         'final_total': final_total
     })
@@ -297,7 +301,6 @@ def admin_vehicle_create(request):
         form = VehicleForm()
     return render(request, 'admin/vehicle_form.html', {'form': form, 'title': 'Thêm xe mới'})
 
-# --- HÀM SỬA XE TRỰC TIẾP TRÊN GIAO DIỆN ---
 @user_passes_test(is_admin)
 def admin_vehicle_edit(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
@@ -316,7 +319,6 @@ def admin_vehicle_edit(request, vehicle_id):
         'vehicle': vehicle
     })
 
-# --- HÀM XÓA XE NHANH QUA AJAX ---
 @user_passes_test(is_admin)
 def admin_vehicle_delete(request, vehicle_id):
     if request.method == 'POST':
