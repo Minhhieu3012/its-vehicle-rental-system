@@ -48,6 +48,18 @@ function initMap(vehicleData) {
 
   // Vẽ các xe lên bản đồ
   vehicleData.forEach(function (xe) {
+    // === [FIX] MAP DATA FIELDS ===
+    // Đảm bảo có lat/lng dù backend trả về latitude/longitude
+    xe.lat = xe.latitude || xe.lat;
+    xe.lng = xe.longitude || xe.lng;
+
+    // Nếu không có tọa độ thì bỏ qua xe này để tránh lỗi
+    if (!xe.lat || !xe.lng) {
+        console.warn("Bỏ qua xe do thiếu tọa độ:", xe.name);
+        return;
+    }
+    // =============================
+
     // Chuẩn hóa trạng thái
     var rawStatus = xe.status ? xe.status.toString() : "available";
     var statusNormal = rawStatus.toLowerCase().trim().replace(/_/g, " ");
@@ -304,6 +316,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const sidebarItem = document.querySelector(
           `.vehicle-item[data-id="${marker.id}"]`,
         );
+        // Lưu ý: Nếu sidebarItem không có data-id, logic này sẽ chỉ ẩn marker
+        // Để đồng bộ ẩn/hiện sidebar, bạn cần đảm bảo HTML sidebar có class 'vehicle-item' và 'data-id'
 
         if (filterValue === "all" || vehicleStatus === filterValue) {
           if (!map.hasLayer(marker)) map.addLayer(marker);
@@ -392,53 +406,33 @@ window.calculateRoute = function (destLat, destLng) {
         var text = step.text;
 
         var translatedText = text
-          // 1. Xử lý câu phức (Ưu tiên cao nhất)
-          .replace(
-            /Enter (.*?) and take the (\d+)(?:st|nd|rd|th) exit/gi,
-            "Vào $1 và đi theo lối ra thứ $2",
-          )
-          .replace(
-            /Enter (.*?) and take the exit/gi,
-            "Vào $1 và đi theo lối ra",
-          )
-          .replace(
-            /Exit the (?:traffic circle|roundabout)/gi,
-            "Ra khỏi vòng xoay",
-          )
+          .replace(/Enter (.*?) and take the (\d+)(?:st|nd|rd|th) exit/gi, "Vào $1 và đi theo lối ra thứ $2")
+          .replace(/Enter (.*?) and take the exit/gi, "Vào $1 và đi theo lối ra")
+          .replace(/Exit the (?:traffic circle|roundabout)/gi, "Ra khỏi vòng xoay")
           .replace(/Into the (?:traffic circle|roundabout)/gi, "Vào vòng xoay")
-
-          // 2. Hành động lái xe
           .replace(/Make a U-turn/gi, "Quay đầu xe")
           .replace(/Make a (?:sharp|slight) right/gi, "Cua sang phải")
           .replace(/Make a (?:sharp|slight) left/gi, "Cua sang trái")
           .replace(/Make a right/gi, "Rẽ phải")
           .replace(/Make a left/gi, "Rẽ trái")
-
-          // 3. Động từ lái xe
           .replace(/Turn left/gi, "Rẽ trái")
           .replace(/Turn right/gi, "Rẽ phải")
           .replace(/Keep left/gi, "Đi sang làn trái")
           .replace(/Keep right/gi, "Đi sang làn phải")
           .replace(/Go straight/gi, "Đi thẳng")
           .replace(/Take the ramp/gi, "Đi vào đường dẫn")
-
-          // 4. Từ lẻ & Hướng
           .replace(/slightly left/gi, "chếch sang trái")
           .replace(/slightly right/gi, "chếch sang phải")
           .replace(/sharp left/gi, "ngoặt gấp sang trái")
           .replace(/sharp right/gi, "ngoặt gấp sang phải")
           .replace(/towards/gi, "về hướng")
           .replace(/stay on/gi, "tiếp tục đi trên")
-
-          // 5. Giới từ
           .replace(/ and /gi, " và ")
           .replace(/ onto /gi, " vào đường ")
           .replace(/ on /gi, " trên đường ")
           .replace(/ to /gi, " đến ")
           .replace(/ at /gi, " tại ")
           .replace(/ your /gi, " của bạn ")
-
-          // 6. Phương hướng
           .replace(/\bNorth\b/gi, "Bắc")
           .replace(/\bSouth\b/gi, "Nam")
           .replace(/\bEast\b/gi, "Đông")
@@ -447,8 +441,6 @@ window.calculateRoute = function (destLat, destLng) {
           .replace(/\bNorthwest\b/gi, "Tây Bắc")
           .replace(/\bSoutheast\b/gi, "Đông Nam")
           .replace(/\bSouthwest\b/gi, "Tây Nam")
-
-          // 7. Dọn dẹp
           .replace(/Enter /gi, "Đi vào ")
           .replace(/Head /gi, "Đi về hướng ")
           .replace(/Continue/gi, "Tiếp tục đi")

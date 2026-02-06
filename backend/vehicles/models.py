@@ -7,8 +7,8 @@ from datetime import timedelta
 # ============
 class Vehicle(models.Model):
     STATUS_CHOICES = [
-        ('Available', 'Available'),       # Đồng bộ chuẩn viết hoa
-        ('Booked', 'Booked'),             # Đồng bộ chuẩn viết hoa
+        ('available', 'Available'),       # Đồng bộ chuẩn viết hoa
+        ('booked', 'Booked'),             # Đồng bộ chuẩn viết hoa
         ('in_use', 'In Use'),
         ('maintenance', 'Maintenance'),
     ]

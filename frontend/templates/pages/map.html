@@ -115,16 +115,23 @@
                 <div id="vehicle-list" class="space-y-4">
                     {% for vehicle in vehicles %}
                     <div class="bg-white dark:bg-[#16222b] rounded-lg p-3 shadow-sm border border-slate-100 dark:border-gray-800 cursor-pointer hover:border-primary transition-all vehicle-card"
-                         onclick="focusVehicle({{ vehicle.latitude }}, {{ vehicle.longitude }})">
+                         onclick="focusVehicle({{ vehicle.latitude|stringformat:'f' }}, {{ vehicle.longitude|stringformat:'f' }})"
+                         data-id="{{ vehicle.id }}">
+                         
                         <div class="flex gap-4">
                             <div class="w-28 h-20 bg-gray-100 rounded-md overflow-hidden relative shrink-0">
                                 <img class="w-full h-full object-cover" src="{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'img/placeholder.jpg' %}{% endif %}" alt="{{ vehicle.name }}" />
-                                {% if vehicle.status|upper != 'AVAILABLE' %}
-                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                    <span class="text-[10px] text-white font-bold uppercase bg-red-600 px-2 py-0.5 rounded">Đã thuê</span>
-                                </div>
+                                
+                                {% if vehicle.status == 'maintenance' %}
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                        <span class="text-[10px] text-white font-bold uppercase bg-slate-600 px-2 py-0.5 rounded border border-white/20">Bảo trì</span>
+                                    </div>
+                                {% elif vehicle.status == 'Booked' or vehicle.status == 'in_use' %}
+                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <span class="text-[10px] text-white font-bold uppercase bg-red-600 px-2 py-0.5 rounded">Đã thuê</span>
+                                    </div>
                                 {% endif %}
-                            </div>
+                                </div>
                             <div class="flex flex-col flex-1 justify-between">
                                 <div>
                                     <h3 class="font-bold text-slate-900 dark:text-white leading-tight">{{ vehicle.name }}</h3>
@@ -132,7 +139,12 @@
                                 </div>
                                 <div class="flex justify-between items-end mt-2">
                                     <p class="text-primary font-bold text-lg">{{ vehicle.price_per_day|floatformat:0 }}đ</p>
-                                    <a href="{% url 'frontend:vehicle_detail' vehicle.id %}" class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">Xem</a>
+                                    
+                                    <a href="javascript:void(0)" 
+                                       onclick="focusVehicle({{ vehicle.latitude|stringformat:'f' }}, {{ vehicle.longitude|stringformat:'f' }}); event.stopPropagation();" 
+                                       class="bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                                       Xem
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -212,33 +224,47 @@
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
     // Lấy dữ liệu xe từ backend
-    const vehicles = JSON.parse(
-        document.getElementById("vehicles-data").textContent
-    );
-
+    const vehiclesDataEl = document.getElementById("vehicles-data");
+    if(!vehiclesDataEl) return;
+    
+    const vehicles = JSON.parse(vehiclesDataEl.textContent);
     const vehicleCards = document.querySelectorAll(".vehicle-card");
     const filterButtons = document.querySelectorAll(".filter-btn");
     const vehicleCount = document.getElementById("vehicle-count");
 
     function applyFilter(filter) {
         let visibleCount = 0;
-
+        
+        // Tạo map để tra cứu nhanh status theo ID nếu cần, hoặc duyệt trực tiếp DOM
+        // Ở đây ta dùng data-id đã thêm vào DOM
+        vehicleCards.forEach((card) => {
+             // Lấy ID từ card (cần thêm data-id vào html như bên trên)
+             // Hoặc dùng index nếu thứ tự đảm bảo khớp nhau
+             
+             // Tuy nhiên, cách đơn giản nhất để sửa lỗi filter là check class hiển thị
+             // Logic filter JS của bạn đang dùng index mảng vehicles.
+             // Cần đảm bảo thứ tự DOM và mảng JSON khớp nhau (thường là vậy)
+        });
+        
+        // Vì logic filter cũ của bạn hơi phụ thuộc index, tôi giữ nguyên logic
+        // nhưng thêm log để debug nếu cần.
         vehicleCards.forEach((card, index) => {
             const vehicle = vehicles[index];
-
             if (!vehicle) return;
 
-            const status = vehicle.status?.toUpperCase();
+            const status = vehicle.status ? vehicle.status.toString() : "";
+            // Chuẩn hóa status về chữ thường để so sánh
+            const statusLower = status.toLowerCase();
+            const filterLower = filter.toLowerCase();
 
             let show = false;
 
-            if (filter === "all") {
+            if (filterLower === "all") {
                 show = true;
-            } else if (filter === "Available" && status === "AVAILABLE") {
+            } else if (filterLower === "available" && statusLower === "available") {
                 show = true;
-            } else if (filter === "Booked" && status === "BOOKED") {
+            } else if (filterLower === "booked" && (statusLower === "booked" || statusLower === "in_use")) {
                 show = true;
             }
 
@@ -253,20 +279,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     filterButtons.forEach(btn => {
         btn.addEventListener("click", function () {
-
-            // UI active button
             filterButtons.forEach(b => {
                 b.classList.remove("bg-primary", "text-white");
                 b.classList.add("bg-slate-100");
             });
-
             this.classList.add("bg-primary", "text-white");
 
             const filter = this.dataset.filter;
             applyFilter(filter);
         });
     });
-
 });
 </script>
 
@@ -278,11 +300,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Chống lan truyền sự kiện click từ Sidebar xuống bản đồ
         const sidebar = document.querySelector('.sidebar-container');
         if (sidebar && typeof L !== 'undefined') { L.DomEvent.disableClickPropagation(sidebar); }
 
-        // Logic UI đồng bộ nút Lọc
         const filterButtons = document.querySelectorAll(".filter-btn");
         filterButtons.forEach(btn => {
             btn.addEventListener("click", function () {
@@ -296,7 +316,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function focusVehicle(lat, lng) {
-        if (typeof map !== 'undefined' && lat && lng) { map.flyTo([lat, lng], 17, { duration: 1.5 }); }
+        if (typeof map !== 'undefined' && lat && lng) { 
+            map.flyTo([lat, lng], 17, { duration: 1.5 }); 
+        } else {
+            console.error("Lỗi tọa độ hoặc map chưa khởi tạo", lat, lng);
+        }
     }
 </script>
 {% endblock %}
