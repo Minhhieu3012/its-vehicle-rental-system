@@ -16,4 +16,4 @@ class BookingAdmin(admin.ModelAdmin):
     )
 
     list_filter = ('status', 'start_date')
-    search_fields = ('user__username', 'vehicle__license_plate')
+    search_fields = ('customer__username', 'vehicle__license_plate')
