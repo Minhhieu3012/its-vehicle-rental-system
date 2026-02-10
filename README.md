@@ -48,14 +48,14 @@ The system not only manages vehicle rentals but also optimizes operations throug
 | Domain | Technology | Role & Application |
 | :--- | :--- | :--- |
 | **Core/Backend** | ![Python](https://img.shields.io/badge/-Python-black?logo=python) ![Django](https://img.shields.io/badge/-Django-black?logo=django) | Core processing, dynamic pricing algorithms, and fleet coordination logic. |
-| **Frontend** | ![HTML5](https://img.shields.io/badge/-HTML5-black?logo=html5) ![Sass](https://img.shields.io/badge/-Sass-black?logo=css) | User interface, interactive dashboards, and map visualization. |
+| **Frontend** | ![HTML5](https://img.shields.io/badge/-HTML5-black?logo=html5) ![CSS](https://img.shields.io/badge/-Sass-black?logo=css) | User interface, interactive dashboards, and map visualization. |
 | **Database** | ![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-black?logo=postgresql) | Relational data storage: fleet, customers, and route history. |
 | **Mapping & GIS** | ![Leaflet](https://img.shields.io/badge/-LeafletJS-black?logo=leaflet) | **Core Feature:** digital mapping, vehicle positioning (markers), and route drawing (polylines). |
 | **DevOps** | ![Docker](https://img.shields.io/badge/-Docker-black?logo=docker) | Application containerization and environment consistency. |
 
 ---
 
-## 🚀 Guide
+## 🚀 Install
 
 ### 1. Clone the repository
 ```bash
