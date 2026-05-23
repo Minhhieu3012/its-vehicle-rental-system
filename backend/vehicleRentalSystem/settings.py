@@ -6,6 +6,8 @@ import dj_database_url
 # Định nghĩa thư mục gốc (Trỏ đến thư mục chứa manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ROOT_DIR = BASE_DIR.parent
+
 # 1. Thêm BASE_DIR vào hệ thống để Django nhận diện các app
 sys.path.append(str(BASE_DIR))
 
@@ -51,7 +53,7 @@ ROOT_URLCONF = 'vehicleRentalSystem.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR  / 'frontend' / 'templates'], 
+        'DIRS': [ROOT_DIR  / 'frontend' / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,20 +91,18 @@ USE_I18N = True
 USE_TZ = True
 
 # 9. Static files (CSS, JS)
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "frontend" / "static", 
-]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+  STATIC_URL = 'static/'
+  STATICFILES_DIRS = [
+      ROOT_DIR / "frontend" / "static", # Đã sửa thành ROOT_DIR
+  ]
+  STATIC_ROOT = ROOT_DIR / "staticfiles" # Đã sửa thành ROOT_DIR
 
-# Cấu hình nén file tĩnh cho WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+  # Cấu hình nén file tĩnh cho WhiteNoise
+  STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# 10. Media files (CẤU HÌNH QUAN TRỌNG ĐỂ HIỆN ẢNH)
-# URL để truy cập ảnh từ trình duyệt (ví dụ: http://localhost:8000/media/car.jpg)
-MEDIA_URL = '/media/'
-# Đường dẫn vật lý để Django lưu ảnh vào thư mục media trong dự án
-MEDIA_ROOT = BASE_DIR / 'media'
+  # 10. Media files (CẤU HÌNH QUAN TRỌNG ĐỂ HIỆN ẢNH)
+  MEDIA_URL = '/media/'
+  MEDIA_ROOT = ROOT_DIR / 'media' # Đã sửa thành ROOT_DIR
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
