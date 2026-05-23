@@ -91,18 +91,18 @@ USE_I18N = True
 USE_TZ = True
 
 # 9. Static files (CSS, JS)
-  STATIC_URL = 'static/'
-  STATICFILES_DIRS = [
-      ROOT_DIR / "frontend" / "static", # Đã sửa thành ROOT_DIR
-  ]
-  STATIC_ROOT = ROOT_DIR / "staticfiles" # Đã sửa thành ROOT_DIR
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    ROOT_DIR / "frontend" / "static",
+]
+STATIC_ROOT = ROOT_DIR / "staticfiles" 
 
-  # Cấu hình nén file tĩnh cho WhiteNoise
-  STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Cấu hình nén file tĩnh cho WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-  # 10. Media files (CẤU HÌNH QUAN TRỌNG ĐỂ HIỆN ẢNH)
-  MEDIA_URL = '/media/'
-  MEDIA_ROOT = ROOT_DIR / 'media' # Đã sửa thành ROOT_DIR
+# 10. Media files (CẤU HÌNH QUAN TRỌNG ĐỂ HIỆN ẢNH)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = ROOT_DIR / 'media' 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
