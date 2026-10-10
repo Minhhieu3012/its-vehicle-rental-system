@@ -12,15 +12,15 @@
 
 ---
 
-## 📖 Overview
+## Overview
 **The Smart Vehicle Rental System** addresses passenger transportation challenges by integrating Intelligent Transportation System (ITS) modules.
 The system not only manages vehicle rentals but also optimizes operations through geospatial data (GIS) and dynamic pricing algorithms.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 1. 🌏 ITS Module & Core Intelligence
+### 1. ITS Module & Core Intelligence
 - **Real-time GIS Mapping (Leaflet):** Visualizes vehicle locations and parking-lot heatmaps on digital maps using the Leaflet API.
 - **Smart Routing:** Automatically calculates optimal routes (distance/time) between pick-up and drop-off points.
 - **Dynamic Pricing Algorithm:** Real-time flexible pricing model:
@@ -28,13 +28,13 @@ The system not only manages vehicle rentals but also optimizes operations throug
     - Demand-based: Price adjustment based on fleet occupancy rate.
 - **Fleet Lifecycle:** Vehicle state workflow: `Available` 🟢 → `Booked` 🟡 → `In Operation` 🔵 → `Maintenance` 🔴
 
-### 2. 👤 User Portal
+### 2. User Portal
 - **KYC & Account:** Registration/Login with driver’s license image upload for identity verification.
 - **Advanced Search:** Multi-criteria vehicle search (Vehicle type, Price range, Nearest location on map).
 - **Booking Flow:** Intuitive booking process with simulated payment gateway integration.
 - **Feedback System:** Post-trip vehicle and service rating system (star voting) to improve recommendation algorithms.
 
-### 3. 👤 Admin Dashboard
+### 3. Admin Dashboard
 - **Fleet Management (CRUD):** Create, update, delete vehicle data, images, and maintenance records.
 - **Order Processing:** Approval or cancellation workflow for customer booking requests.
 - **Data Analytics:** 
@@ -43,7 +43,7 @@ The system not only manages vehicle rentals but also optimizes operations throug
 
 ---
 
-## 🛠 Technology Stack
+## Technology Stack
 
 | Domain | Technology | Role & Application |
 | :--- | :--- | :--- |
@@ -55,7 +55,7 @@ The system not only manages vehicle rentals but also optimizes operations throug
 
 ---
 
-## 🚀 Install
+## Install
 
 ### 1. Clone the repository
 ```bash
@@ -73,6 +73,6 @@ docker-compose up -d --build
 
 ---
 
-## 📝 Note
+## Note
 - This project is a course assignment for Intelligent Transportation Systems (ITS).
 - All vehicle data and transactions are simulated for academic and demonstration purposes only.
