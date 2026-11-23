@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Trang chủ - ITS Rental{% endblock %}
@@ -63,7 +63,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {% for vehicle in featured_vehicles %}
-            <div class="flex flex-col gap-3 bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow {% if vehicle.status|upper != 'AVAILABLE' %}opacity-75 grayscale-[50%]{% endif %}">
+            <div class="flex flex-col gap-3 bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow {% if vehicle.status != 'available' %}opacity-75 grayscale-[50%]{% endif %}">
                 <a href="{% url 'frontend:vehicle_detail' vehicle.id %}">
                     <div class="w-full aspect-video bg-cover bg-center rounded-lg"
                          style="background-image: url('{% if vehicle.image %}{{ vehicle.image.url }}{% else %}{% static 'frontend/img/placeholder.jpg' %}{% endif %}');">
@@ -74,16 +74,24 @@
                     <div class="flex justify-between items-start mb-1">
                         <div>
                             <p class="text-slate-900 dark:text-white text-lg font-bold">{{ vehicle.name }}</p>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm">{{ vehicle.vehicle_type }}</p>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">{{ vehicle.get_vehicle_type_display }}</p>
                         </div>
 
-                        {% if vehicle.status|upper == 'AVAILABLE' %}
+                        {% if vehicle.status == 'available' %}
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
                             Có sẵn
                         </span>
+                        {% elif vehicle.status == 'booked' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                            Đã đặt
+                        </span>
+                        {% elif vehicle.status == 'in_use' %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                            Đang chạy
+                        </span>
                         {% else %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                            Đã thuê
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                            Bảo trì
                         </span>
                         {% endif %}
                     </div>
@@ -94,10 +102,10 @@
                             <span class="text-sm font-normal text-slate-500 dark:text-slate-400">/ngày</span>
                         </p>
 
-                        {% if vehicle.status|upper == 'AVAILABLE' %}
+                        {% if vehicle.status != 'maintenance' %}
                         <a href="{% url 'frontend:vehicle_detail' vehicle.id %}" class="text-sm font-medium text-primary hover:text-sky-600 underline">Xem chi tiết</a>
                         {% else %}
-                        <span class="text-sm font-medium text-slate-400 cursor-not-allowed">Không khả dụng</span>
+                        <span class="text-sm font-medium text-slate-400 cursor-not-allowed">Đang bảo trì</span>
                         {% endif %}
                     </div>
                 </div>

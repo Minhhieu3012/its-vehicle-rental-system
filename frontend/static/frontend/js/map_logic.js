@@ -5,6 +5,8 @@ var map;
 var userMarker;
 var searchMarker;
 var allMarkers = [];
+var heatmapLayer = null;
+var isHeatmapVisible = false;
 var isUserAction = false;
 var userLat = null;
 var userLng = null;
@@ -172,6 +174,35 @@ function initMap(vehicleData) {
     `;
         marker.bindPopup(popupContent);
     });
+
+    // Khởi tạo lớp Heatmap bãi đỗ / mật độ xe (ITS Parking-lot Heatmap)
+    if (typeof L.heatLayer === "function") {
+        var heatPoints = [];
+        vehicleData.forEach(function (xe) {
+            if (!xe.lat || !xe.lng) return;
+            var statusKey = (xe.status || "available").toString().toLowerCase().trim();
+            // Trọng số phản ánh mật độ hoạt động / nhu cầu tại điểm đỗ xe
+            var intensity = 0.6;
+            if (statusKey === "in_use" || statusKey === "booked") {
+                intensity = 1.0;
+            } else if (statusKey === "maintenance") {
+                intensity = 0.35;
+            }
+            heatPoints.push([parseFloat(xe.lat), parseFloat(xe.lng), intensity]);
+        });
+
+        heatmapLayer = L.heatLayer(heatPoints, {
+            radius: 35,
+            blur: 22,
+            maxZoom: 16,
+            gradient: {
+                0.2: "#38bdf8",
+                0.5: "#22c55e",
+                0.75: "#f59e0b",
+                1.0: "#ef4444",
+            },
+        });
+    }
 }
 
 // =========================
@@ -504,17 +535,54 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ======================
-    // C. BỘ LỌC XE (FILTER)
+    // C. BỘ LỌC XE & HEATMAP
     // ======================
-    
-    // Lọc trên Bản đồ và Sidebar
+    function normalizeStatusKey(raw) {
+        return (raw || "").toString().toLowerCase().trim().replace(/\s+/g, "_");
+    }
+
+    function applyFilter(filterValue) {
+        const filterKey = normalizeStatusKey(filterValue);
+        const vehicleCards = document.querySelectorAll(".vehicle-card");
+        const vehicleCount = document.getElementById("vehicle-count");
+
+        // 1. Lọc Marker trên bản đồ
+        allMarkers.forEach((marker) => {
+            const markerStatus = normalizeStatusKey(marker.status);
+            const matches = filterKey === "all" || markerStatus === filterKey;
+            if (matches) {
+                if (!map.hasLayer(marker)) map.addLayer(marker);
+            } else {
+                if (map.hasLayer(marker)) map.removeLayer(marker);
+            }
+        });
+
+        // 2. Lọc danh sách xe trên Sidebar đồng bộ theo data-id
+        const markerStatusById = {};
+        allMarkers.forEach((m) => {
+            markerStatusById[String(m.id)] = normalizeStatusKey(m.status);
+        });
+
+        let visibleCount = 0;
+        vehicleCards.forEach((card) => {
+            const cardId = String(card.getAttribute("data-id") || "");
+            const cardStatus = markerStatusById[cardId] || "";
+            const show = filterKey === "all" || cardStatus === filterKey;
+            card.style.display = show ? "block" : "none";
+            if (show) visibleCount++;
+        });
+
+        if (vehicleCount) {
+            vehicleCount.textContent = `${visibleCount} xe tìm thấy`;
+        }
+    }
+
     document.addEventListener("click", function (e) {
         const filterBtn = e.target.closest(".filter-btn");
         if (filterBtn) {
             e.preventDefault();
-            const filterValue = filterBtn.getAttribute("data-filter").toLowerCase().trim();
+            const filterValue = filterBtn.getAttribute("data-filter") || "all";
 
-            // Cập nhật màu nút (Active: Xanh, Inactive: Xám)
             document.querySelectorAll(".filter-btn").forEach((btn) => {
                 btn.classList.remove("bg-primary", "text-white");
                 btn.classList.add("bg-slate-100", "text-slate-600");
@@ -522,19 +590,24 @@ document.addEventListener("DOMContentLoaded", function () {
             filterBtn.classList.remove("bg-slate-100", "text-slate-600");
             filterBtn.classList.add("bg-primary", "text-white");
 
-            // Lọc Marker và Danh sách Sidebar
-            allMarkers.forEach((marker) => {
-                const vehicleStatus = (marker.status || "").toLowerCase().trim();
-                const sidebarItem = document.querySelector(`.vehicle-item[data-id="${marker.id}"]`);
+            applyFilter(filterValue);
+            return;
+        }
 
-                if (filterValue === "all" || vehicleStatus === filterValue) {
-                    if (!map.hasLayer(marker)) map.addLayer(marker);
-                    if (sidebarItem) sidebarItem.style.display = "flex";
-                } else {
-                    if (map.hasLayer(marker)) map.removeLayer(marker);
-                    if (sidebarItem) sidebarItem.style.display = "none";
-                }
-            });
+        const heatmapBtn = e.target.closest("#toggle-heatmap-btn");
+        if (heatmapBtn && map && heatmapLayer) {
+            e.preventDefault();
+            if (isHeatmapVisible) {
+                map.removeLayer(heatmapLayer);
+                isHeatmapVisible = false;
+                heatmapBtn.classList.remove("bg-orange-500", "text-white", "border-orange-500");
+                heatmapBtn.classList.add("bg-white", "text-slate-700");
+            } else {
+                heatmapLayer.addTo(map);
+                isHeatmapVisible = true;
+                heatmapBtn.classList.remove("bg-white", "text-slate-700");
+                heatmapBtn.classList.add("bg-orange-500", "text-white", "border-orange-500");
+            }
             return;
         }
 
@@ -544,58 +617,6 @@ document.addEventListener("DOMContentLoaded", function () {
             getUserLocation();
         }
     });
-
-    // Lọc trên Danh sách Xe (Vehicle Cards)
-    const vehiclesDataEl = document.getElementById("vehicles-data");
-    if (vehiclesDataEl) {
-        const vehicles = JSON.parse(vehiclesDataEl.textContent);
-        const vehicleCards = document.querySelectorAll(".vehicle-card");
-        const filterButtons = document.querySelectorAll(".filter-btn");
-        const vehicleCount = document.getElementById("vehicle-count");
-
-        function applyFilter(filter) {
-            let visibleCount = 0;
-
-            vehicleCards.forEach((card, index) => {
-                const vehicle = vehicles[index];
-                if (!vehicle) return;
-
-                const status = vehicle.status ? vehicle.status.toString() : "";
-                const statusLower = status.toLowerCase();
-                const filterLower = filter.toLowerCase();
-
-                let show = false;
-
-                if (filterLower === "all") {
-                    show = true;
-                } else if (filterLower === "available" && statusLower === "available") {
-                    show = true;
-                } else if (filterLower === "booked" && (statusLower === "booked" || statusLower === "in_use")) {
-                    show = true;
-                }
-
-                card.style.display = show ? "block" : "none";
-                if (show) visibleCount++;
-            });
-
-            if (vehicleCount) {
-                vehicleCount.textContent = `${visibleCount} xe tìm thấy`;
-            }
-        }
-
-        filterButtons.forEach(btn => {
-            btn.addEventListener("click", function () {
-                filterButtons.forEach(b => {
-                    b.classList.remove("bg-primary", "text-white");
-                    b.classList.add("bg-slate-100");
-                });
-                this.classList.add("bg-primary", "text-white");
-
-                const filter = this.dataset.filter;
-                applyFilter(filter);
-            });
-        });
-    }
 
     // =========================
     // D. VÔ HIỆU HÓA SIDEBAR LEAFLET

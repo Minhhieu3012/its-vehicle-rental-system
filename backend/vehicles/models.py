@@ -6,11 +6,16 @@ from datetime import timedelta
 # 1. MODEL XE 
 # ============
 class Vehicle(models.Model):
+    STATUS_AVAILABLE = 'available'
+    STATUS_BOOKED = 'booked'
+    STATUS_IN_USE = 'in_use'
+    STATUS_MAINTENANCE = 'maintenance'
+
     STATUS_CHOICES = [
-        ('available', 'Available'),       # Đồng bộ chuẩn viết hoa
-        ('booked', 'Booked'),             # Đồng bộ chuẩn viết hoa
-        ('in_use', 'In Use'),
-        ('maintenance', 'Maintenance'),
+        (STATUS_AVAILABLE, 'Available'),
+        (STATUS_BOOKED, 'Booked'),
+        (STATUS_IN_USE, 'In Use'),
+        (STATUS_MAINTENANCE, 'Maintenance'),
     ]
 
     VEHICLE_TYPE_CHOICES = [
@@ -48,7 +53,7 @@ class Vehicle(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='Available'
+        default=STATUS_AVAILABLE
     )
 
     latitude = models.FloatField(null=True, blank=True)
@@ -76,31 +81,20 @@ class Vehicle(models.Model):
             return "Điện/Xăng"
         return "Xăng"
 
-    # --- HÀM TÍNH TỔNG TIỀN: DUYỆT TỪNG NGÀY ĐỂ TÍNH PHỤ PHÍ CHÍNH XÁC ---
-    def calculate_total_price(self, pickup_date, return_date):
-        """Tính tổng tiền: Từng ngày một + 20% phụ phí nếu rơi vào Thứ 7/CN"""
+    # --- HÀM TÍNH TỔNG TIỀN: DÙNG CHUNG LOGIC DYNAMIC PRICING TỪ BOOKINGS ---
+    def calculate_total_price(self, pickup_date, return_date, include_tax=False, reference_dt=None):
+        """Tính tổng tiền theo Dynamic Pricing thống nhất giữa các module."""
         if not pickup_date or not return_date:
             return self.price_per_day
-            
-        delta = return_date - pickup_date
-        total_days = delta.days if delta.days > 0 else 1
-        
-        total_amount = 0
-        current_date = pickup_date
-        daily_price = float(self.price_per_day)
 
-        # Duyệt qua từng ngày trong khoảng thời gian thuê để kiểm tra cuối tuần
-        for i in range(total_days):
-            # weekday() trả về 5 cho Thứ 7 và 6 cho Chủ nhật
-            if current_date.weekday() >= 5:
-                total_amount += daily_price * 1.2  # Áp dụng phụ phí 20% cho ngày này
-            else:
-                total_amount += daily_price  # Giá ngày thường
-            
-            # Nhảy sang ngày tiếp theo để kiểm tra
-            current_date += timedelta(days=1)
-            
-        return total_amount
+        from bookings.utils import calc_total_price
+        return calc_total_price(
+            self,
+            pickup_date,
+            return_date,
+            include_tax=include_tax,
+            reference_dt=reference_dt,
+        )
 
     def __str__(self):
         return f"{self.name} - {self.license_plate}"

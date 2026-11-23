@@ -19,6 +19,7 @@ body {
 /* Đảm bảo Sidebar và các nút điều khiển luôn nằm trên Map */
 .sidebar-container,
 #locate-me-btn,
+#toggle-heatmap-btn,
 .filter-btn {
     pointer-events: auto !important;
     position: relative;

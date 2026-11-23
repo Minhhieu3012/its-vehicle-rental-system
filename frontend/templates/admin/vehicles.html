@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Quản lý Xe - ITS Rental{% endblock %}
@@ -79,15 +79,16 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
-                                    {% if vehicle.status|lower == 'available' %}bg-green-100 text-green-700
-                                    {% elif vehicle.status|lower == 'booked' %}bg-yellow-100 text-yellow-700
+                                    {% if vehicle.status == 'available' %}bg-green-100 text-green-700
+                                    {% elif vehicle.status == 'booked' %}bg-yellow-100 text-yellow-700
+                                    {% elif vehicle.status == 'in_use' %}bg-blue-100 text-blue-700
                                     {% else %}bg-red-100 text-red-700{% endif %}">
                                     {{ vehicle.get_status_display }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center gap-4">
-                                    {% if vehicle.status|upper != 'AVAILABLE' %}
+                                    {% if vehicle.status != 'available' %}
                                     <a href="{% url 'frontend:admin_release_vehicle' vehicle.id %}"
                                        class="text-sky-600 hover:text-sky-700 transition-colors font-bold text-xs flex items-center gap-1"
                                        onclick="return confirm('Mở trạng thái cho xe này?')">

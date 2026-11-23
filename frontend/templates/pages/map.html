@@ -26,10 +26,20 @@
                                placeholder="Nhập địa chỉ + Enter" id="location-search" />
                     </div>
                     <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                        <button class="px-4 py-1.5 rounded-full bg-primary text-white text-xs font-semibold filter-btn shadow-sm" data-filter="all">Tất cả</button>
-                        <button class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold filter-btn" data-filter="Available">Có sẵn</button>
-                        <button class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold filter-btn" data-filter="Booked">Đã thuê</button>
+                        <button class="px-3 py-1.5 rounded-full bg-primary text-white text-xs font-semibold filter-btn shadow-sm shrink-0" data-filter="all">Tất cả</button>
+                        <button class="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold filter-btn shrink-0" data-filter="available">Có sẵn</button>
+                        <button class="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold filter-btn shrink-0" data-filter="booked">Đã đặt</button>
+                        <button class="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold filter-btn shrink-0" data-filter="in_use">Đang chạy</button>
+                        <button class="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 text-xs font-semibold filter-btn shrink-0" data-filter="maintenance">Bảo trì</button>
                     </div>
+                    {% if occupancy_percent is not None %}
+                    <div class="flex items-center justify-between text-xs bg-slate-50 dark:bg-gray-800/80 px-3 py-2 rounded-lg border border-slate-200 dark:border-gray-700">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Mật độ sử dụng đội xe (ITS)</span>
+                        <span class="font-bold {% if occupancy_percent >= 70 %}text-red-600{% elif occupancy_percent >= 50 %}text-amber-600{% else %}text-emerald-600{% endif %}">
+                            {{ occupancy_percent }}%
+                        </span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -47,11 +57,15 @@
                                 
                                 {% if vehicle.status == 'maintenance' %}
                                     <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                        <span class="text-[10px] text-white font-bold uppercase bg-slate-600 px-2 py-0.5 rounded border border-white/20">Bảo trì</span>
+                                        <span class="text-[10px] text-white font-bold uppercase bg-red-600 px-2 py-0.5 rounded border border-white/20">Bảo trì</span>
                                     </div>
-                                {% elif vehicle.status == 'Booked' or vehicle.status == 'in_use' %}
+                                {% elif vehicle.status == 'in_use' %}
                                     <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                        <span class="text-[10px] text-white font-bold uppercase bg-red-600 px-2 py-0.5 rounded">Đã thuê</span>
+                                        <span class="text-[10px] text-white font-bold uppercase bg-blue-600 px-2 py-0.5 rounded">Đang chạy</span>
+                                    </div>
+                                {% elif vehicle.status == 'booked' %}
+                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <span class="text-[10px] text-white font-bold uppercase bg-amber-500 px-2 py-0.5 rounded">Đã đặt</span>
                                     </div>
                                 {% endif %}
                                 </div>
@@ -79,8 +93,13 @@
 
         <main class="flex-1 relative bg-slate-200">
             <div id="map"></div>
-            <div class="absolute bottom-6 right-6 z-[2100]">
-                <button class="bg-white dark:bg-slate-800 text-primary p-3 rounded-full shadow-2xl hover:scale-110 transition-transform border border-slate-200" id="locate-me-btn">
+            <div class="absolute bottom-6 right-6 z-[2100] flex flex-col gap-3 items-end">
+                <button class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3.5 py-2.5 rounded-full shadow-2xl hover:scale-105 transition-transform border border-slate-200 dark:border-slate-700 flex items-center gap-2 text-xs font-bold"
+                        id="toggle-heatmap-btn" title="Bật/tắt bản đồ nhiệt mật độ bãi đỗ">
+                    <span class="material-symbols-outlined text-[18px] text-orange-500">local_fire_department</span>
+                    <span>Heatmap bãi đỗ</span>
+                </button>
+                <button class="bg-white dark:bg-slate-800 text-primary p-3 rounded-full shadow-2xl hover:scale-110 transition-transform border border-slate-200" id="locate-me-btn" title="Vị trí của tôi">
                     <span class="material-symbols-outlined">my_location</span>
                 </button>
             </div>
@@ -148,6 +167,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <script src="{% static 'frontend/js/map_logic.js' %}"></script>
 {% endblock %}

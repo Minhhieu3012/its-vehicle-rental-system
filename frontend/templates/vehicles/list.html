@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Danh sách xe - ITS Rental{% endblock %}
@@ -57,12 +57,14 @@
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
 
                         <div class="absolute top-3 left-3">
-                            {% if vehicle.status|upper == 'AVAILABLE' %}
+                            {% if vehicle.status == 'available' %}
                             <span class="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-sm border border-emerald-600">Có sẵn</span>
-                            {% elif vehicle.status|upper == 'MAINTENANCE' %}
-                            <span class="bg-amber-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-sm border border-amber-600">Bảo trì</span>
+                            {% elif vehicle.status == 'booked' %}
+                            <span class="bg-amber-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-sm border border-amber-600">Đã đặt</span>
+                            {% elif vehicle.status == 'in_use' %}
+                            <span class="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-sm border border-blue-600">Đang chạy</span>
                             {% else %}
-                            <span class="bg-blue-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-sm border border-blue-600">Đã thuê</span>
+                            <span class="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded uppercase shadow-sm border border-red-600">Bảo trì</span>
                             {% endif %}
                         </div>
                     </div>
@@ -101,7 +103,7 @@
                             </div>
 
                             <span class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold group-hover:bg-sky-600 transition-colors">
-                                {% if vehicle.status|upper == 'AVAILABLE' %}Thuê ngay{% else %}Chi tiết{% endif %}
+                                {% if vehicle.status == 'available' %}Thuê ngay{% else %}Chi tiết{% endif %}
                             </span>
                         </div>
                     </div>

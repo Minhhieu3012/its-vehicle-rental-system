@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Thanh toán - ITS Rental{% endblock %}
@@ -167,6 +167,31 @@
                                         <small class="block text-[10px] text-amber-500 uppercase font-bold">+20% Phụ phí cuối tuần</small>
                                     </span>
                                     <span class="font-semibold text-amber-700 dark:text-amber-300">{{ weekend_total|floatformat:0 }}đ</span>
+                                </div>
+                                {% endif %}
+
+                                {% if is_peak_hour and peak_surcharge > 0 %}
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-orange-600 dark:text-orange-400 font-medium">
+                                        Phụ phí giờ cao điểm (+{{ peak_surcharge_percent }}%)
+                                        <small class="block text-[10px] text-orange-500 uppercase font-bold">ITS Time-based (7-9h / 17-19h)</small>
+                                    </span>
+                                    <span class="font-semibold text-orange-700 dark:text-orange-300">+{{ peak_surcharge|floatformat:0 }}đ</span>
+                                </div>
+                                {% endif %}
+
+                                {% if demand_surcharge > 0 %}
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-rose-600 dark:text-rose-400 font-medium">
+                                        Phụ phí nhu cầu cao (+{{ demand_surcharge_percent }}%)
+                                        <small class="block text-[10px] text-rose-500 uppercase font-bold">Tỷ lệ lấp đầy đội xe: {{ occupancy_percent }}%</small>
+                                    </span>
+                                    <span class="font-semibold text-rose-700 dark:text-rose-300">+{{ demand_surcharge|floatformat:0 }}đ</span>
+                                </div>
+                                {% else %}
+                                <div class="flex justify-between text-xs text-slate-400">
+                                    <span>Tỷ lệ lấp đầy đội xe (ITS Demand)</span>
+                                    <span>{{ occupancy_percent }}% (Chuẩn)</span>
                                 </div>
                                 {% endif %}
 

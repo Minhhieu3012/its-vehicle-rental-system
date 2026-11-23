@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Trả xe - ITS Rental{% endblock %}
@@ -209,8 +209,7 @@
                         <div class="col-span-2 flex justify-between">
                             <span class="text-slate-500 dark:text-slate-400">Hạn trả</span>
                             <span class="font-medium text-slate-900 dark:text-white text-right">
-                                {{ booking.return_date|date:"d/m/Y" }}<br>
-                                <span class="text-xs text-slate-400">{{ booking.return_date|date:"H:i" }}</span>
+                                {{ booking.end_date|date:"d/m/Y" }}
                             </span>
                         </div>
                     </div>

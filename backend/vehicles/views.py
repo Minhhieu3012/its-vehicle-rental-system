@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.serializers.json import DjangoJSONEncoder
@@ -27,9 +27,9 @@ def vehicle_list_api(request):
     # --- LOGIC LỌC ---
     availability = request.GET.get('availability')
     if availability == 'available':
-        vehicles = vehicles.filter(status='available') 
+        vehicles = vehicles.filter(status=Vehicle.STATUS_AVAILABLE) 
     elif availability == 'unavailable':
-        vehicles = vehicles.exclude(status='available')
+        vehicles = vehicles.exclude(status=Vehicle.STATUS_AVAILABLE)
     
     # Lọc theo giá
     min_price = request.GET.get('min_price')
@@ -132,44 +132,34 @@ def map_view(request):
     """
     Render trang bản đồ với dữ liệu chuẩn Rental (Rating, Lượt thuê, Giá)
     """
-    # Lấy xe có tọa độ + Tính toán Rating trung bình
     vehicles = Vehicle.objects.exclude(latitude__isnull=True).exclude(longitude__isnull=True).annotate(
         avg_rating=Avg('reviews__rating'),
-        review_count=Count('reviews')
+        review_count=Count('reviews', distinct=True),
+        completed_trips=Count('bookings', filter=Q(bookings__status='completed'), distinct=True),
     )
-    
-    vehicles_list = []
-    
-    for v in vehicles:
-        # Xử lý trạng thái hiển thị
-        status_display = v.status
-        if status_display == 'in_use':
-            status_display = 'in operation'
-            
-        # 1. Rating giả lập 
-        rating_val = round(v.avg_rating, 1) if v.avg_rating else 5.0
-        
-        # 2. Số lượt thuê giả lập 
-        trips_val = v.review_count * 15 + random.randint(5, 50)
 
+    vehicles_list = []
+
+    for v in vehicles:
+        rating_val = round(v.avg_rating, 1) if v.avg_rating else 5.0
         vehicles_list.append({
             'id': v.id,
             'name': v.name,
             'plate': v.license_plate,
             'lat': float(v.latitude),
             'lng': float(v.longitude),
-            'status': status_display, 
+            'status': v.status,
+            'status_display': v.get_status_display(),
             'price': float(v.price_per_day),
-            
-            # --- CÁC TRƯỜNG MỚI ---
             'rating': rating_val,
-            'trips': trips_val, 
+            'trips': v.completed_trips,
         })
 
     context = {
-        'vehicles_json': json.dumps(vehicles_list, cls=DjangoJSONEncoder)
+        'vehicles': vehicles,
+        'vehicles_json': vehicles_list,
     }
-    return render(request, 'vehicles/map.html', context)
+    return render(request, 'pages/map.html', context)
 
 
 # ============== 3. API REVIEWS & UPLOAD ==============

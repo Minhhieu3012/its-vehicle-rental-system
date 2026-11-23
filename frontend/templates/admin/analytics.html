@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Thống kê - ITS Rental{% endblock %}
@@ -43,10 +43,10 @@
         </nav>
     </aside>
 
-    <div class="flex-1 p-6 lg:p-10 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-        <h1 class="text-2xl font-black text-slate-900 dark:text-white mb-8 tracking-tight">Thống kê hiệu quả (ITS Real-time)</h1>
+    <div class="flex-1 p-6 lg:p-10 bg-slate-50 dark:bg-slate-900 transition-colors duration-300 space-y-8">
+        <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Thống kê & Dự báo (ITS Real-time Analytics)</h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:shadow-md transition-shadow">
                 <div>
                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Đơn hoàn thành</p>
@@ -66,77 +66,128 @@
                     <span class="material-symbols-outlined">cancel</span>
                 </div>
             </div>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Tỷ lệ lấp đầy đội xe</p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ fleet_occupancy_percent }}%</p>
+                </div>
+                <div class="p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-lg">
+                    <span class="material-symbols-outlined">speed</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Dự báo tháng tới</p>
+                    <p class="text-2xl font-bold text-primary mt-1">{{ next_month_forecast|floatformat:0 }}đ</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Ước tính cả năm: {{ projected_annual_revenue|floatformat:0 }}đ</p>
+                </div>
+                <div class="p-3 bg-sky-100 dark:bg-sky-900/30 text-sky-600 rounded-lg">
+                    <span class="material-symbols-outlined">auto_graph</span>
+                </div>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                 <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">trending_up</span>
-                    Biểu đồ doanh thu theo tháng
+                    Doanh thu thực tế & Dự báo doanh thu theo tháng
                 </h3>
-                <span class="text-xs text-slate-400 italic">Dữ liệu thực tế</span>
+                <span class="text-xs text-slate-400 italic">Hồi quy tuyến tính theo thời gian thực</span>
             </div>
             <div class="p-6">
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                    <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-500">event_repeat</span>
+                        Tần suất thuê xe theo tháng
+                    </h3>
+                    <span class="text-xs text-slate-400 italic">Số lượt đặt hợp lệ</span>
+                </div>
+                <div class="p-6">
+                    <canvas id="frequencyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                    <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-500">pie_chart</span>
+                        Tần suất theo loại xe
+                    </h3>
+                </div>
+                <div class="p-6 flex items-center justify-center">
+                    <canvas id="vehicleTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+{{ revenue_list|json_script:"revenue-data" }}
+{{ forecast_series|json_script:"forecast-data" }}
+{{ monthly_rental_counts|json_script:"frequency-data" }}
+{{ vehicle_type_labels|json_script:"type-labels-data" }}
+{{ vehicle_type_counts|json_script:"type-counts-data" }}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const months = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+        const realRevenueData = JSON.parse(document.getElementById('revenue-data').textContent);
+        const forecastData = JSON.parse(document.getElementById('forecast-data').textContent);
+        const frequencyData = JSON.parse(document.getElementById('frequency-data').textContent);
+        const typeLabels = JSON.parse(document.getElementById('type-labels-data').textContent);
+        const typeCounts = JSON.parse(document.getElementById('type-counts-data').textContent);
 
-        // Nhận dữ liệu thật từ Django qua filter safe để JS hiểu đó là mảng
-        const realRevenueData = {{ revenue_list|safe }};
-
-        new Chart(ctx, {
+        // 1. Biểu đồ Doanh thu thực tế & Dự báo
+        const revCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revCtx, {
             type: 'bar',
             data: {
-                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-                datasets: [{
-                    label: 'Doanh thu thực tế (VND)',
-                    data: realRevenueData,
-                    backgroundColor: '#0ea5e9',
-                    borderRadius: 6,
-                    hoverBackgroundColor: '#0284c7'
-                }]
+                labels: months,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Doanh thu thực tế (VND)',
+                        data: realRevenueData,
+                        backgroundColor: '#0ea5e9',
+                        borderRadius: 6,
+                        hoverBackgroundColor: '#0284c7'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Dự báo doanh thu ITS (VND)',
+                        data: forecastData,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                        borderWidth: 3,
+                        borderDash: [6, 6],
+                        tension: 0.25,
+                        pointRadius: 4,
+                        spanGaps: false
+                    }
+                ]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            color: '#64748b',
-                            font: {
-                                family: 'Inter, system-ui, sans-serif',
-                                weight: '600'
-                            }
-                        }
-                    },
+                    legend: { position: 'top' },
                     tooltip: {
-                        backgroundColor: '#1e293b',
-                        titleColor: '#f1f5f9',
-                        bodyColor: '#f1f5f9',
-                        padding: 12,
-                        borderColor: '#334155',
-                        borderWidth: 1,
                         callbacks: {
                             label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('vi-VN', { 
-                                        style: 'currency', 
-                                        currency: 'VND' 
-                                    }).format(context.parsed.y);
-                                }
-                                return label;
+                                if (context.parsed.y === null) return '';
+                                return context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(context.parsed.y);
                             }
                         }
                     }
@@ -144,31 +195,61 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: '#e2e8f0'
-                        },
                         ticks: {
-                            color: '#64748b',
-                            font: {
-                                family: 'Inter, system-ui, sans-serif'
-                            },
                             callback: function(value) {
                                 return value.toLocaleString('vi-VN') + ' đ';
                             }
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#64748b',
-                            font: {
-                                family: 'Inter, system-ui, sans-serif',
-                                weight: '600'
-                            }
-                        }
-                    }
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Biểu đồ Tần suất thuê xe theo tháng
+        const freqCtx = document.getElementById('frequencyChart').getContext('2d');
+        new Chart(freqCtx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Số lượt thuê',
+                    data: frequencyData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 3. Biểu đồ Tần suất thuê theo loại phương tiện
+        const typeCtx = document.getElementById('vehicleTypeChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: typeLabels,
+                datasets: [{
+                    data: typeCounts,
+                    backgroundColor: ['#0ea5e9', '#10b981', '#6366f1'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
                 }
             }
         });

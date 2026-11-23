@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -6,15 +7,15 @@ from django.shortcuts import get_object_or_404
 
 from .models import Booking
 from vehicles.models import Vehicle
-from .utils import is_overlapping, calc_total_price
+from .utils import (
+    is_overlapping,
+    calculate_dynamic_pricing,
+    sync_vehicle_status_after_booking_change,
+)
 
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
-
-
-def _vehicle_booked_code():
-    return "rented"
 
 
 @csrf_exempt
@@ -33,7 +34,6 @@ def create_booking(request):
 
     vehicle = get_object_or_404(Vehicle, id=vehicle_id)
 
-    from datetime import date
     try:
         s = date.fromisoformat(start_date)
         e = date.fromisoformat(end_date)
@@ -43,43 +43,53 @@ def create_booking(request):
     if e < s:
         return JsonResponse({"detail": "end_date phải >= start_date"}, status=400)
 
-    # SỬA: Cho phép đặt xe nếu trạng thái là 'available' HOẶC nếu đặt cho tương lai (status khác nhưng không trùng lịch)
-    # Chúng ta bỏ qua check status cứng nhắc này, vì hàm is_overlapping bên dưới sẽ lo việc kiểm tra trùng lịch.
-    
-    # if getattr(vehicle, "status", "") != "available":
-    #    return JsonResponse({"detail": "Xe không sẵn sàng"}, status=400)
-    
-    # Thay vào đó, chỉ chặn nếu xe đang 'maintenance' (Bảo trì) vì bảo trì thường không biết ngày xong
-    if str(getattr(vehicle, "status", "")).lower() in ["maintenance", "bao tri"]:
-         return JsonResponse({"detail": "Xe đang bảo trì, không thể đặt lúc này"}, status=400)
+    # Chỉ chặn nếu xe đang bảo trì; các trường hợp khác kiểm tra trùng lịch bên dưới
+    if vehicle.status == Vehicle.STATUS_MAINTENANCE:
+        return JsonResponse({"detail": "Xe đang bảo trì, không thể đặt lúc này"}, status=400)
 
     if is_overlapping(vehicle, s, e):
         return JsonResponse({"detail": "Xe bị trùng lịch"}, status=400)
 
-    total = calc_total_price(vehicle, s, e)
+    pricing = calculate_dynamic_pricing(vehicle, s, e, include_tax=True)
 
     booking = Booking.objects.create(
-        user=request.user,
+        customer=request.user,
         vehicle=vehicle,
         start_date=s,
         end_date=e,
-        total_price=total,
+        total_price=pricing["final_total"],
         status="pending",
     )
+
+    if vehicle.status == Vehicle.STATUS_AVAILABLE:
+        vehicle.status = Vehicle.STATUS_BOOKED
+        vehicle.save(update_fields=["status"])
 
     return JsonResponse({
         "id": booking.id,
         "status": booking.status,
         "total_price": str(booking.total_price),
         "vehicle_id": booking.vehicle_id,
+        "vehicle_status": vehicle.status,
         "start_date": str(booking.start_date),
         "end_date": str(booking.end_date),
+        "pricing": {
+            "days": pricing["days"],
+            "base_total": str(pricing["base_total"]),
+            "peak_surcharge": str(pricing["peak_surcharge"]),
+            "peak_surcharge_percent": pricing["peak_surcharge_percent"],
+            "demand_surcharge": str(pricing["demand_surcharge"]),
+            "demand_surcharge_percent": pricing["demand_surcharge_percent"],
+            "occupancy_percent": pricing["occupancy_percent"],
+            "tax_fee": str(pricing["tax_fee"]),
+            "final_total": str(pricing["final_total"]),
+        },
     }, status=201)
 
 
 @login_required
 def my_bookings(request):
-    qs = Booking.objects.filter(user=request.user).select_related("vehicle").order_by("-id")
+    qs = Booking.objects.filter(customer=request.user).select_related("vehicle").order_by("-id")
     data = []
     for b in qs:
         data.append({
@@ -90,6 +100,7 @@ def my_bookings(request):
                 "id": b.vehicle_id,
                 "license_plate": getattr(b.vehicle, "license_plate", ""),
                 "name": getattr(b.vehicle, "name", ""),
+                "status": b.vehicle.status,
             },
             "start_date": str(b.start_date),
             "end_date": str(b.end_date),
@@ -105,7 +116,7 @@ def cancel_booking(request, booking_id: int):
 
     b = get_object_or_404(Booking, id=booking_id)
 
-    if (not request.user.is_staff) and b.user_id != request.user.id:
+    if (not request.user.is_staff) and b.customer_id != request.user.id:
         return JsonResponse({"detail": "Không có quyền huỷ booking này"}, status=403)
 
     if b.status not in ("pending", "approved"):
@@ -114,11 +125,9 @@ def cancel_booking(request, booking_id: int):
     b.status = "cancelled"
     b.save(update_fields=["status"])
 
-    v = b.vehicle
-    v.status = "available"
-    v.save(update_fields=["status"])
+    vehicle_status = sync_vehicle_status_after_booking_change(b.vehicle)
 
-    return JsonResponse({"id": b.id, "status": b.status})
+    return JsonResponse({"id": b.id, "status": b.status, "vehicle_status": vehicle_status})
 
 
 @csrf_exempt
@@ -136,10 +145,10 @@ def approve_booking(request, booking_id: int):
     b.save(update_fields=["status"])
 
     v = b.vehicle
-    v.status = _vehicle_booked_code()
+    v.status = Vehicle.STATUS_IN_USE
     v.save(update_fields=["status"])
 
-    return JsonResponse({"id": b.id, "status": b.status})
+    return JsonResponse({"id": b.id, "status": b.status, "vehicle_status": v.status})
 
 
 @csrf_exempt
@@ -156,8 +165,6 @@ def complete_booking(request, booking_id: int):
     b.status = "completed"
     b.save(update_fields=["status"])
 
-    v = b.vehicle
-    v.status = "available"
-    v.save(update_fields=["status"])
+    vehicle_status = sync_vehicle_status_after_booking_change(b.vehicle)
 
-    return JsonResponse({"id": b.id, "status": b.status})
+    return JsonResponse({"id": b.id, "status": b.status, "vehicle_status": vehicle_status})
