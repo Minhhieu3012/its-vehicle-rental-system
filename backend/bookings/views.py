@@ -1,15 +1,16 @@
 import json
 from datetime import date
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from vehicles.models import Vehicle
 
 from .models import Booking
-from vehicles.models import Vehicle
 from .utils import (
-    is_overlapping,
     calculate_dynamic_pricing,
+    is_overlapping,
     sync_vehicle_status_after_booking_change,
 )
 

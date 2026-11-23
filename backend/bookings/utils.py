@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
+
 from django.db.models import Q
 from django.utils import timezone
 

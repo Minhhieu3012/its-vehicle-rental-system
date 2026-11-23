@@ -1,6 +1,5 @@
 from django.db import models
-from users.models import User 
-from datetime import timedelta 
+from users.models import User
 
 # ============
 # 1. MODEL XE 
@@ -63,6 +62,8 @@ class Vehicle(models.Model):
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = models.Manager()
+
     # --- TỰ ĐỘNG XÁC ĐỊNH SỐ CHỖ DỰA TRÊN LOẠI XE ---
     @property
     def seats(self):
@@ -105,6 +106,8 @@ class Vehicle(models.Model):
 class VehicleImage(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='vehicle_gallery/', verbose_name="Ảnh chi tiết")
+
+    objects = models.Manager()
 
     def __str__(self):
         return f"Ảnh của xe {self.vehicle.name}"

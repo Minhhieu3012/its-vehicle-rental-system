@@ -20,5 +20,7 @@ class Review(models.Model):
     comment = models.TextField(blank=True, null=True, verbose_name="Nhận xét")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Ngày tạo")
 
+    objects = models.Manager()
+
     def __str__(self):
         return f"{self.user.username} đánh giá {self.vehicle.name}"

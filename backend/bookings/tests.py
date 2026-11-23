@@ -1,18 +1,17 @@
 import json
 from datetime import date, datetime
 from decimal import Decimal
-from django.test import TestCase, Client
-from django.urls import reverse
-from django.contrib.auth import get_user_model
 
-from vehicles.models import Vehicle
 from bookings.models import Booking
 from bookings.utils import (
     calculate_dynamic_pricing,
     forecast_monthly_revenue,
     get_fleet_occupancy_rate,
-    is_overlapping,
 )
+from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+from django.urls import reverse
+from vehicles.models import Vehicle
 
 User = get_user_model()
 

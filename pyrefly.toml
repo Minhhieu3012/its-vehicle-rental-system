@@ -1,0 +1,6 @@
+search-path = [".", "backend"]
+project-excludes = ["**/.git", "**/__pycache__", "staticfiles", "media"]
+
+[errors]
+# Django ORM tự sinh động các thuộc tính qua metaclass (objects, get_*_display, related_name, *_id)
+missing-attribute = false
