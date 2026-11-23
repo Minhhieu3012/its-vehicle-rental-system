@@ -21,10 +21,34 @@ const DEFAULT_LNG = 106.660172;
 function initMap(vehicleData) {
     map = L.map("map").setView([DEFAULT_LAT, DEFAULT_LNG], 12);
 
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap",
-    }).addTo(map);
+    // Lớp bản đồ mặc định: OpenStreetMap chuẩn (miễn phí, không cần API key)
+    var osmStandard = L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }
+    );
+
+    // Lớp bản đồ vệ tinh Esri
+    var esriSatellite = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+            maxZoom: 19,
+            attribution: "Tiles &copy; Esri",
+        }
+    );
+
+    osmStandard.addTo(map);
+
+    L.control.layers(
+        {
+            "Bản đồ chuẩn (OpenStreetMap)": osmStandard,
+            "Vệ tinh": esriSatellite,
+        },
+        null,
+        { position: "topright" }
+    ).addTo(map);
 
     function createCarIcon(color) {
         var svgHtml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="35" height="35">

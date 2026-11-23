@@ -18,6 +18,8 @@ SECRET_KEY = 'django-insecure-^u30-jmlkmxhizxcva5*vy56kj)3beu^n%e%u!z8yfr60tv*ae
 DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['*'] # Cho phép truy cập từ mọi host trong Docker
+# Cho phép gửi Referer hợp lệ khi gọi bản đồ OpenStreetMap / dịch vụ GIS bên ngoài
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # 3. Đăng ký các ứng dụng
 INSTALLED_APPS = [
