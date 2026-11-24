@@ -32,7 +32,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      # Đổi cổng host sang 5433 để tránh trùng với PostgreSQL cài sẵn trên Windows (cổng 5432)
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
