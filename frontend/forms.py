@@ -1,6 +1,6 @@
-﻿from django import forms
+from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UsernameField
 
 # --- IMPORT MODELS ---
 # Sử dụng try-except để đảm bảo an toàn nếu các app chưa được thiết lập hoàn tất
@@ -17,7 +17,7 @@ User = get_user_model()
 # 1. FORM ĐĂNG NHẬP
 # ==========================
 class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={
+    username = UsernameField(widget=forms.TextInput(attrs={
         'class': 'w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-primary',
         'placeholder': 'Tên đăng nhập'
     }))

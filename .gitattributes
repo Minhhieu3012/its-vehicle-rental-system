@@ -1,0 +1,4 @@
+# Exclude the 2 largest HTML template folders from GitHub Linguist language stats
+# so Python accurately reflects as the primary language while remaining HTML files stay counted.
+frontend/templates/admin/* linguist-vendored
+frontend/templates/bookings/* linguist-vendored
